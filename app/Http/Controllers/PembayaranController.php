@@ -1461,14 +1461,7 @@ class PembayaranController extends Controller
         $terbilang   = '#' . strtoupper($this->terbilang($jumlah)) . ' Rupiah#';
         $namaKavling = $lokasi->nama_kavling ?? '-';
         $tipe        = $kavling->tipe_bangunan ?? '-';
-        $blokNomor   = '-';
-        if ($lokasi) {
-            if ($lokasi->is_cluster) {
-                $blokNomor = ($kavling->cluster ?? '-') . '-' . ($kavling->no ?? '-');
-            } else {
-                $blokNomor = $kavling->kode_kavling ?? '-';
-            }
-        }
+        $blokNomor   = $kavling->kode_kavling ?? '-';
         $rumahId         = $kavling->id_rumah_sikumbang ?? '-';
         $hargaJual       = $kavling->hrg_jual ?? 0;
         $kotaTtd         = $lokasi->kota_penandatangan ?? '-';
@@ -1528,7 +1521,7 @@ class PembayaranController extends Controller
         $pdf->Cell(60, 4, ' : ' . $tipe, 0, 1, 'L');
 
         $pdf->Cell(20, 4, '', 0, 0, 'L');
-        $labelBlok = $lokasi->is_cluster ? 'Cluster / Nomor' : 'Blok / Nomor';
+        $labelBlok = 'Blok / Nomor';
         $pdf->Cell(25, 4, $labelBlok, 0, 0, 'L');
         $pdf->Cell(60, 4, ' : ' . $blokNomor, 0, 1, 'L');
 
@@ -1631,11 +1624,7 @@ class PembayaranController extends Controller
                 ->addColumn('lokasi', function ($row) {
                     $namaLokasi = optional($row->lokasi)->nama_kavling ?? '-';
 
-                    if (optional($row->lokasi)->is_cluster == 1) {
-                        $kodeKavling = $row->cluster . '-' . $row->no ?? '-';
-                    } else {
-                        $kodeKavling = $row->kode_kavling ?? '-';
-                    }
+                    $kodeKavling = $row->kode_kavling ?? '-';
 
                     return '<strong>' . $namaLokasi . '</strong><br>' . $kodeKavling;
                 })

@@ -221,14 +221,10 @@ class PindahUnitController extends Controller
             Pemasukan::create($pemasukan);
 
             $kavlingBaru              = KavlingPeta::with('lokasi')->find($request->id_kavling_baru);
-            $kavlingBaru->id_customer = $request->id_customer;
 
-            $kavlingBaru->save();
 
             $kavlingLama              = KavlingPeta::find($customer->id_kavling);
-            $kavlingLama->id_customer = null;
 
-            $kavlingLama->save();
 
             $customer->id_kavling = $request->id_kavling_baru;
             $customer->save();
@@ -290,18 +286,6 @@ class PindahUnitController extends Controller
             $customer    = $data->customer;
             $kavlingLama = $data->kavlingLama;
             $kavlingBaru = $data->kavlingBaru;
-
-            if ($kavlingBaru) {
-                $kavlingBaru->id_customer = null;
-
-                $kavlingBaru->save();
-            }
-
-            if ($kavlingLama) {
-                $kavlingLama->id_customer = $customer->id;
-
-                $kavlingLama->save();
-            }
 
             if ($customer && $kavlingLama) {
                 $customer->id_kavling = $kavlingLama->id;

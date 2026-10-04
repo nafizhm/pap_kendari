@@ -10,6 +10,7 @@
                 <div class="row mb-2">
                     <div class="col-sm-6">
                         <h1 class="m-0 font-weight-bold ">Dashboard</h1>
+                        <p class="text-muted mt-2 mb-0">Ringkasan penjualan dan aktivitas: <strong class="text-primary">{{ $period->label }}</strong></p>
                     </div>
                 </div>
             </div>
@@ -17,6 +18,7 @@
 
         <section class="content">
             <div class="container-fluid">
+                @include('admin.dashboard.period-filter')
                 <!-- Small boxes (Stat box) -->
                 <div class="row">
                     <div class="col-lg-3 col-6">
@@ -92,7 +94,7 @@
                                 </div>
                                 <!-- /.widget-user-image -->
                                 <h3 class="widget-user-username">Statistik Penjualan per Lokasi</h3>
-                                <h5 class="widget-user-desc">Per {{ $tglSekarang }}</h5>
+                                <h5 class="widget-user-desc">{{ $period->label }} ? Per {{ $tglSekarang }}</h5>
                             </div>
                             <div class="card-footer p-0">
 
@@ -130,7 +132,7 @@
                                                     @endif
                                                 @endforeach
                                                 <td align="center" class="table-primary">
-                                                    <a href="{{ route('dashboard.lokasi-penjualan-show', $lokasi['id']) }}"
+                                                    <a href="{{ route('dashboard.lokasi-penjualan-show', array_merge(['id' => $lokasi['id']], $periodQuery)) }}"
                                                         class="btn btn-primary btn-xs btn-detail">
                                                         Detail
                                                     </a>
@@ -178,7 +180,7 @@
                                 </div>
                                 <!-- /.widget-user-image -->
                                 <h3 class="widget-user-username">Statistik Status Progres</h3>
-                                <h5 class="widget-user-desc">Per {{ $tglSekarang }}</h5>
+                                <h5 class="widget-user-desc">{{ $period->label }} ? Per {{ $tglSekarang }}</h5>
                             </div>
 
                             <div class="card-footer p-0">
@@ -201,7 +203,7 @@
                                                 <td align="right">{{ $item['jumlah'] }}</td>
                                                 <td align="right">{{ $item['persentase'] }} %</td>
                                                 <td align="center">
-                                                    <a href="{{ route('dashboard.customer-status-progres-show', $item['id_status_progres']) }}"
+                                                    <a href="{{ route('dashboard.customer-status-progres-show', array_merge(['id' => $item['id_status_progres']], $periodQuery)) }}"
                                                         class="btn bg-maroon btn-xs">Detail Data</a>
                                                 </td>
                                             </tr>
@@ -225,7 +227,7 @@
                                 </div>
                                 <!-- /.widget-user-image -->
                                 <h3 class="widget-user-username">Statistik Penggunaan Bank</h3>
-                                <h5 class="widget-user-desc">Per {{ $tglSekarang }}</h5>
+                                <h5 class="widget-user-desc">{{ $period->label }} ? Per {{ $tglSekarang }}</h5>
                             </div>
 
                             <div class="card-footer p-0">
@@ -248,7 +250,7 @@
                                                 <td align="right">{{ $bank['jumlah'] }}</td>
                                                 <td align="right">{{ $bank['persentase'] }} %</td>
                                                 <td align="center">
-                                                    <a href="{{ route('dashboard.customer-bank-show', $bank['id_bank']) }}"
+                                                    <a href="{{ route('dashboard.customer-bank-show', array_merge(['id' => $bank['id_bank']], $periodQuery)) }}"
                                                         class="btn bg-indigo btn-xs">Detail Data</a>
                                                 </td>
                                             </tr>
@@ -272,7 +274,7 @@
                                 </div>
                                 <!-- /.widget-user-image -->
                                 <h3 class="widget-user-username">Statistik Penjualan Marketing</h3>
-                                <h5 class="widget-user-desc">Per {{ $tglSekarang }}</h5>
+                                <h5 class="widget-user-desc">{{ $period->label }} ? Per {{ $tglSekarang }}</h5>
                             </div>
 
                             <table class="table table-bordered">
@@ -293,7 +295,7 @@
                                             <td align="right">{{ $marketing['jumlah'] }}</td>
                                             <td align="right">{{ $marketing['persentase'] }} %</td>
                                             <td align="center">
-                                                <a href="{{ route('dashboard.customer-marketing-show', $marketing['id_marketing']) }}"
+                                                <a href="{{ route('dashboard.customer-marketing-show', array_merge(['id' => $marketing['id_marketing']], $periodQuery)) }}"
                                                     class="btn bg-teal btn-xs">Detail Data</a>
                                             </td>
                                         </tr>

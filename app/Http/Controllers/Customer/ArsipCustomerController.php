@@ -95,10 +95,6 @@ class ArsipCustomerController extends Controller
         DB::transaction(function () use ($id) {
             $data = Customer::where('stt_arsip', 1)->lockForUpdate()->findOrFail($id);
 
-            // Lepaskan hanya kavling yang masih menunjuk customer ini.
-            KavlingPeta::where('id_customer', $data->id)->update([
-                'id_customer' => null,
-            ]);
 
             $this->logDelete('Arsip Customer (Permanen)', $data->id);
             $data->delete();

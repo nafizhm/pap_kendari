@@ -173,8 +173,6 @@ class GantiNamaController extends Controller
             $customerLama->stt_arsip = 1;
             $customerLama->save();
 
-            $customerLama->kavling->id_customer = $customerBaru->id;
-            $customerLama->kavling->save();
 
             if ($request->hasFile('lampiran_bukti')) {
                 $lampiran_bukti          = $request->file('lampiran_bukti');
@@ -283,11 +281,6 @@ class GantiNamaController extends Controller
             UploudFile::where('id_customer', $customerBaru->id)
                 ->update(['id_customer' => $customerLama->id]);
 
-            $kavling = KavlingPeta::where('id_customer', $customerBaru->id)->first();
-            if ($kavling) {
-                $kavling->id_customer = $customerLama->id;
-                $kavling->save();
-            }
 
             $customerLama->stt_arsip = 0;
             $customerLama->save();

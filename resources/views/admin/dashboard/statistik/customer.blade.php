@@ -21,6 +21,8 @@
                                 </div>
                             </div>
                             <div class="card-body">
+                                <p class="text-muted">Periode: <strong>{{ $period->label }}</strong> ? Berdasarkan tanggal verifikasi customer.</p>
+                                <a class="btn btn-sm btn-outline-secondary mb-3" href="{{ route('dashboard.index', $period->parameters()) }}">Kembali ke Dashboard</a>
                                 <table class="table table-bordered table-striped w-100 data-table">
                                     <thead>
                                         <tr>
@@ -61,7 +63,7 @@
                 serverSide: false,
                 ordering: false,
                 responsive: true,
-                ajax: "{{ route(Route::currentRouteName(), ['id' => $status_progres_id ?? ($bank_id ?? $marketing_id)]) }}",
+                ajax: { url: @json(url()->current()), data: @json($period->parameters()) },
                 columns: [{
                         data: 'DT_RowIndex',
                         name: 'DT_RowIndex',

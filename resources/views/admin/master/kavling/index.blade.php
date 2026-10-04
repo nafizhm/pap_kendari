@@ -112,20 +112,10 @@
                         </div>
 
                         <div class="form-group row">
-                            <label class="col-sm-3 col-form-label">Panjang Kanan</label>
+                            <label class="col-sm-3 col-form-label">Panjang</label>
                             <div class="col-sm-3">
                                 <div class="input-group">
-                                    <input type="text" name="panjang_kanan" id="panjang_kanan"
-                                        class="form-control format-decimal">
-                                    <div class="input-group-append">
-                                        <span class="input-group-text">m</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <label class="col-sm-2 col-form-label">Panjang Kiri</label>
-                            <div class="col-sm-3">
-                                <div class="input-group">
-                                    <input type="text" name="panjang_kiri" id="panjang_kiri"
+                                    <input type="text" name="panjang" id="panjang"
                                         class="form-control format-decimal">
                                     <div class="input-group-append">
                                         <span class="input-group-text">m</span>
@@ -135,20 +125,10 @@
                         </div>
 
                         <div class="form-group row">
-                            <label class="col-sm-3 col-form-label">Lebar Depan</label>
+                            <label class="col-sm-3 col-form-label">Lebar</label>
                             <div class="col-sm-3">
                                 <div class="input-group">
-                                    <input type="text" name="lebar_depan" id="lebar_depan"
-                                        class="form-control format-decimal">
-                                    <div class="input-group-append">
-                                        <span class="input-group-text">m</span>
-                                    </div>
-                                </div>
-                            </div>
-                            <label class="col-sm-2 col-form-label">Lebar Belakang</label>
-                            <div class="col-sm-3">
-                                <div class="input-group">
-                                    <input type="text" name="lebar_belakang" id="lebar_belakang"
+                                    <input type="text" name="lebar" id="lebar"
                                         class="form-control format-decimal">
                                     <div class="input-group-append">
                                         <span class="input-group-text">m</span>
@@ -203,20 +183,11 @@
                                         class="form-control font-weight-bold" readonly style="background:#e9ecef">
                                 </div>
                             </div>
-                            <label class="col-sm-2 col-form-label">Daya Listrik</label>
-                            <div class="col-sm-3">
-                                <input type="text" name="daya_listrik" id="daya_listrik"
-                                    class="form-control format-number">
-                            </div>
                         </div>
                         <div class="form-group row">
                             <label class="col-sm-3 col-form-label">Keterangan</label>
                             <div class="col-sm-4">
                                 <textarea name="keterangan" id="keterangan" class="form-control" rows="3"></textarea>
-                            </div>
-                            <label class="col-sm-2 col-form-label">No. Sertif</label>
-                            <div class="col-sm-3">
-                                <input type="text" name="no_sertifikat" id="no_sertifikat" class="form-control">
                             </div>
                         </div>
                     </div>
@@ -286,7 +257,7 @@
                         <div class="alert alert-info small">
                             <i class="fas fa-info-circle mr-1"></i>
                             Gunakan file hasil <strong>Cetak Excel</strong> yang sudah diedit. Pastikan header kolom tidak diubah.
-                            Setiap ukuran memiliki kolom terpisah: panjang kanan/kiri, lebar depan/belakang, luas tanah, dan luas bangunan.
+                            Setiap ukuran memiliki kolom terpisah: panjang, lebar, luas tanah, dan luas bangunan.
                             Isi ukuran dengan angka tanpa satuan. Kolom ukuran yang kosong mempertahankan nilai sebelumnya.
                             Perumahan dan Kode Kavling digunakan untuk mencocokkan data; jangan diubah. Total Harga dihitung dari komponen biaya.
                         </div>
@@ -650,20 +621,16 @@
                     $('#primary_id').val(data.id);
                     $('#nama_kavling').val(data.lokasi.nama_kavling);
                     $('#kode_kavling').val(data.kode_kavling);
-                    $('#panjang_kanan').val(data.panjang_kanan);
-                    $('#panjang_kiri').val(data.panjang_kiri);
-                    $('#lebar_depan').val(data.lebar_depan);
-                    $('#lebar_belakang').val(data.lebar_belakang);
+                    $('#panjang').val(data.panjang);
+                    $('#lebar').val(data.lebar);
                     $('#luas_tanah').val(data.luas_tanah);
                     $('#luas_bangunan').val(data.luas_bangunan);
-                    $('#daya_listrik').val(formatNumber(data.daya_listrik));
 
                     deletedBiayaNames = [];
                     $('#deleted-biaya-container').remove();
                     renderBiayaItems(data.rincian_biaya || []);
 
                     $('#keterangan').val(data.keterangan);
-                    $('#no_sertifikat').val(data.no_sertifikat);
 
                     $('#modalForm').modal('show');
                 }

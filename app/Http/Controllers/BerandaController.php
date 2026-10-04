@@ -16,6 +16,7 @@ use App\Models\SPPR;
 use App\Models\Wawancara;
 use App\Models\WawancaraSp3k;
 use Carbon\Carbon;
+use App\Support\DashboardPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -24,28 +25,29 @@ class BerandaController extends Controller
     public function index(Request $request)
     {
         $username = Auth::user()->username;
+        $period = DashboardPeriod::fromRequest($request);
 
         $pipelineCounts = [
-            'booking' => PengajuanHold::where('stt_reg', '!=', 2)->count(),
+            'booking' => $period->apply(PengajuanHold::query(), 'tgl_booking')->where('stt_reg', '!=', 2)->count(),
             'wawancara' => Wawancara::where('status', 1)
-                ->whereHas('customer', fn ($query) => $query->where('stt_arsip', 0))
+                ->whereHas('customer', fn ($query) => $period->apply($query)->where('stt_arsip', 0))
                 ->count(),
             'acc_bank' => WawancaraSp3k::where('status', 1)
-                ->whereHas('wawancara.customer', fn ($query) => $query->where('stt_arsip', 0))
+                ->whereHas('wawancara.customer', fn ($query) => $period->apply($query)->where('stt_arsip', 0))
                 ->count(),
-            'akad' => Akad::count(),
+            'akad' => Akad::when($period->start, fn ($query) => $query->whereHas('detail.customer', fn ($customer) => $period->apply($customer)))->count(),
         ];
 
-        $today = Carbon::now('Asia/Jakarta')->toDateString();
-
-        $salesYear = (int) $request->input('sales_year', Carbon::now('Asia/Jakarta')->year);
+        $salesYear = (int) $request->input('sales_year', $period->start?->year ?? Carbon::now('Asia/Jakarta')->year);
         if ($salesYear < 2000 || $salesYear > 2100) {
             $salesYear = Carbon::now('Asia/Jakarta')->year;
         }
-        $monthlyBookings = PengajuanHold::whereYear('tgl_booking', $salesYear)
+        $monthlyBookings = $period->apply(PengajuanHold::query(), 'tgl_booking')
+            ->whereYear('tgl_booking', $salesYear)
             ->whereIn('stt_reg', [1, 2])
-            ->selectRaw('MONTH(tgl_booking) as month, stt_reg, COUNT(*) as total')
-            ->groupByRaw('MONTH(tgl_booking), stt_reg')->get();
+            ->get(['tgl_booking', 'stt_reg'])
+            ->map(fn ($booking) => ['month' => Carbon::parse($booking->tgl_booking)->month,
+                'stt_reg' => $booking->stt_reg, 'total' => 1]);
         $monthlySales = collect(['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'])
             ->map(function ($label, $index) use ($monthlyBookings) {
                 $rows = $monthlyBookings->where('month', $index + 1);
@@ -55,9 +57,9 @@ class BerandaController extends Controller
         $salesScale = max(1, $monthlySales->max('pending'), $monthlySales->max('approved'));
 
         $summaryMetrics = [
-            'jumlah_project' => LokasiKavling::whereIn('stt_tampil', [1, 3])->count(),
+            'jumlah_project' => LokasiKavling::count(),
             'total_unit' => KavlingPeta::count(),
-            'booking_fee_hari_ini' => PengajuanHold::whereDate('tgl_booking', $today)->sum('booking_fee'),
+            'booking_fee' => $period->apply(PengajuanHold::query(), 'tgl_booking')->sum('booking_fee'),
             'piutang' => 0,
             'piutang_customer' => 0,
             'tagihan_tempo_customer' => 0,
@@ -67,7 +69,7 @@ class BerandaController extends Controller
         $projectStats = LokasiKavling::orderBy('urutan')
             ->orderBy('id')
             ->get()
-            ->map(function (LokasiKavling $lokasi) {
+            ->map(function (LokasiKavling $lokasi) use ($period) {
                 $lokasiId = $lokasi->id;
 
                 return [
@@ -75,17 +77,17 @@ class BerandaController extends Controller
                     'nama' => $lokasi->nama_kavling,
                     'kode' => $lokasi->nama_singkat,
                     'total_unit' => KavlingPeta::where('id_lokasi', $lokasiId)->count(),
-                    'booking' => PengajuanHold::where('id_lokasi', $lokasiId)->where('stt_reg', '!=', 2)->count(),
-                    'sppr' => SPPR::whereHas('customer', fn ($query) => $query->where('id_lokasi', $lokasiId)->where('stt_arsip', 0))->count(),
+                    'booking' => $period->apply(PengajuanHold::query(), 'tgl_booking')->where('id_lokasi', $lokasiId)->where('stt_reg', '!=', 2)->count(),
+                    'sppr' => SPPR::whereHas('customer', fn ($query) => $period->apply($query)->where('id_lokasi', $lokasiId)->where('stt_arsip', 0))->count(),
                     'wawancara' => Wawancara::where('status', 1)
-                        ->whereHas('customer', fn ($query) => $query->where('id_lokasi', $lokasiId)->where('stt_arsip', 0))
+                        ->whereHas('customer', fn ($query) => $period->apply($query)->where('id_lokasi', $lokasiId)->where('stt_arsip', 0))
                         ->count(),
                     'acc_bank' => WawancaraSp3k::where('status', 1)
-                        ->whereHas('wawancara.customer', fn ($query) => $query->where('id_lokasi', $lokasiId)->where('stt_arsip', 0))
+                        ->whereHas('wawancara.customer', fn ($query) => $period->apply($query)->where('id_lokasi', $lokasiId)->where('stt_arsip', 0))
                         ->count(),
-                    'ppjb' => PPJB::whereHas('customer', fn ($query) => $query->where('id_lokasi', $lokasiId)->where('stt_arsip', 0))->count(),
-                    'akad' => AkadDetail::whereHas('customer', fn ($query) => $query->where('id_lokasi', $lokasiId)->where('stt_arsip', 0))->count(),
-                    'bast' => BAST::whereHas('customer', fn ($query) => $query->where('id_lokasi', $lokasiId)->where('stt_arsip', 0))->count(),
+                    'ppjb' => PPJB::whereHas('customer', fn ($query) => $period->apply($query)->where('id_lokasi', $lokasiId)->where('stt_arsip', 0))->count(),
+                    'akad' => AkadDetail::whereHas('customer', fn ($query) => $period->apply($query)->where('id_lokasi', $lokasiId)->where('stt_arsip', 0))->count(),
+                    'bast' => BAST::whereHas('customer', fn ($query) => $period->apply($query)->where('id_lokasi', $lokasiId)->where('stt_arsip', 0))->count(),
                 ];
             });
 
@@ -101,13 +103,13 @@ class BerandaController extends Controller
 
         $marketingStats = MarketingOffline::orderBy('nama_marketing')
             ->get()
-            ->map(function (MarketingOffline $marketing) {
+            ->map(function (MarketingOffline $marketing) use ($period) {
                 return [
                     'id' => $marketing->id,
                     'nama' => $marketing->nama_marketing,
                     'kode' => $marketing->kode_marketing,
                     'inisial' => mb_substr($marketing->nama_marketing, 0, 1),
-                    'jumlah' => Customer::where('id_marketing', $marketing->id)
+                    'jumlah' => $period->apply(Customer::query())->where('id_marketing', $marketing->id)
                         ->where('stt_arsip', 0)
                         ->count(),
                 ];
@@ -115,12 +117,14 @@ class BerandaController extends Controller
             ->sortByDesc('jumlah')
             ->values();
 
-        $totalBankUsage = WawancaraSp3k::where('status', 1)->count();
+        $bankApplications = WawancaraSp3k::where('status', 1)
+            ->when($period->start, fn ($query) => $query->whereHas('wawancara.customer', fn ($customer) => $period->apply($customer)));
+        $totalBankUsage = (clone $bankApplications)->count();
 
         $bankStats = BankKPR::orderBy('nama')
             ->get()
-            ->map(function (BankKPR $bank) use ($totalBankUsage) {
-                $jumlah = WawancaraSp3k::where('status', 1)
+            ->map(function (BankKPR $bank) use ($totalBankUsage, $bankApplications) {
+                $jumlah = (clone $bankApplications)
                     ->where('id_bank_kpr', $bank->id)
                     ->count();
 
@@ -137,6 +141,7 @@ class BerandaController extends Controller
 
         return view('admin.beranda.index', compact(
             'username',
+            'period',
             'pipelineCounts',
             'summaryMetrics',
             'projectStats',

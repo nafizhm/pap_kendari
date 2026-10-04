@@ -10,25 +10,34 @@ use App\Models\ProgresListPenjualan;
 use App\Models\Wawancara;
 use App\Models\WawancaraSp3k;
 use Carbon\Carbon;
+use App\Support\DashboardPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
 
 class DashboardController extends Controller
 {
-    public function dashboard()
+    public function dashboard(Request $request)
     {
         if (! Auth::check()) {
             return redirect()->route('login')->withError('Silahkan Login terlebih dahulu');
         }
 
+        $period = DashboardPeriod::fromRequest($request);
+        $periodQuery = $period->parameters();
+        $customers = $period->apply(Customer::query());
+        $bankApplications = WawancaraSp3k::where('status', 1);
+        if ($period->start) {
+            $bankApplications->whereHas('wawancara.customer', fn ($query) => $period->apply($query));
+        }
+
         Carbon::setLocale('id');
         $tglSekarang   = Carbon::now()->translatedFormat('j F Y');
         $totalKavling  = KavlingPeta::count();
-        $totalCustomer = Customer::count();
-        $merah        = Customer::where('id_status_progres', 2)->count();
-        $hijau         = Customer::where('id_status_progres', 7)->count();
-        $ungu           = Customer::where('id_status_progres', 3)->count();
+        $totalCustomer = (clone $customers)->count();
+        $merah        = (clone $customers)->where('id_status_progres', 2)->count();
+        $hijau         = (clone $customers)->where('id_status_progres', 7)->count();
+        $ungu           = (clone $customers)->where('id_status_progres', 3)->count();
 
         $kolomStatus = ProgresListPenjualan::where('stt_tampil', 1)
             ->where('id', '!=', 8)
@@ -49,7 +58,7 @@ class DashboardController extends Controller
             $totalSemua[$key] = 0;
         }
 
-        $dataLokasi = LokasiKavling::whereIn('stt_tampil', [1, 3])->get()->map(function ($lokasi) use ($kolomStatus, &$totalSemua) {
+        $dataLokasi = LokasiKavling::get()->map(function ($lokasi) use ($kolomStatus, &$totalSemua, $customers, $period) {
 
             $id = $lokasi->id;
 
@@ -58,10 +67,10 @@ class DashboardController extends Controller
                 'nama'         => $lokasi->nama_kavling,
                 'jumlah'       => KavlingPeta::where('id_lokasi', $id)->count(),
                 'nama_singk_1' => $lokasi->nama_singkat,
-                'kpr'          => Customer::where('id_lokasi', $id)->where('jenis_pembelian', 'KPR')->count(),
-                'cash'         => Customer::where('id_lokasi', $id)->where('jenis_pembelian', 'Pembelian Cash')->count(),
-                'kredit'       => Customer::where('id_lokasi', $id)->where('jenis_pembelian', 'Cash Bertahap')->count(),
-                'hold'         => KavlingPeta::where('id_lokasi', $id)->whereDoesntHave('customer')->whereHas('activeBookings')->count(),
+                'kpr'          => (clone $customers)->where('id_lokasi', $id)->where('jenis_pembelian', 'KPR')->count(),
+                'cash'         => (clone $customers)->where('id_lokasi', $id)->where('jenis_pembelian', 'Pembelian Cash')->count(),
+                'kredit'       => (clone $customers)->where('id_lokasi', $id)->where('jenis_pembelian', 'Cash Bertahap')->count(),
+                'hold'         => KavlingPeta::where('id_lokasi', $id)->whereDoesntHave('customer')->whereHas('activeBookings', fn ($query) => $period->apply($query, 'tgl_booking'))->count(),
             ];
 
             $totalSemua['jumlah'] += $data['jumlah'];
@@ -76,7 +85,7 @@ class DashboardController extends Controller
                 if ($status->id == 1) {
                     $data[$key] = KavlingPeta::where('id_lokasi', $id)->available()->count();
                 } else {
-                    $data[$key] = Customer::where('id_lokasi', $id)
+                    $data[$key] = (clone $customers)->where('id_lokasi', $id)
                         ->where('id_status_progres', $status->id)
                         ->count();
                 }
@@ -92,7 +101,7 @@ class DashboardController extends Controller
         $noProgres   = 1;
 
         foreach ($progresList as $progres) {
-            $jumlah     = Customer::where('id_status_progres', $progres->id)->count();
+            $jumlah     = (clone $customers)->where('id_status_progres', $progres->id)->count();
             $persentase = $totalCustomer > 0 ? round(($jumlah / $totalCustomer) * 100) : 0;
 
             $dataProgres[] = [
@@ -108,11 +117,11 @@ class DashboardController extends Controller
         $dataBank = [];
         $noBank   = 1;
 
-        $totalWawancara = WawancaraSp3k::where('status', 1)->count();
+        $totalWawancara = (clone $bankApplications)->count();
 
         foreach ($bankList as $bank) {
 
-            $jumlah = WawancaraSp3k::where('status', 1)
+            $jumlah = (clone $bankApplications)
                 ->where('id_bank_kpr', $bank->id)
                 ->count();
 
@@ -138,7 +147,7 @@ class DashboardController extends Controller
         $noMarketing   = 1;
 
         foreach ($marketingList as $marketing) {
-            $jumlah     = Customer::where('id_marketing', $marketing->id)->count();
+            $jumlah     = (clone $customers)->where('id_marketing', $marketing->id)->count();
             $persentase = $totalCustomer > 0 ? round(($jumlah / $totalCustomer) * 100) : 0;
 
             $dataMarketing[] = [
@@ -151,6 +160,8 @@ class DashboardController extends Controller
         }
 
         return view('admin.dashboard.dashboard', compact(
+            'period',
+            'periodQuery',
             'totalKavling',
             'tglSekarang',
             'dataLokasi',
@@ -178,6 +189,12 @@ class DashboardController extends Controller
             ->withCount('customer')
             ->where('id_lokasi', $id)
             ->orderByRaw("SUBSTRING_INDEX(kode_kavling, '-', 1), CAST(SUBSTRING_INDEX(SUBSTRING_INDEX(kode_kavling, '-', -1), 'A', 1) AS UNSIGNED), kode_kavling");
+
+        $period = DashboardPeriod::fromRequest(request());
+        if ($period->start) {
+            $query->whereHas('customer', fn ($customer) => $period->apply($customer));
+        }
+        $viewData['period'] = $period;
 
         if (request()->ajax()) {
             return DataTables::of($query->get())
@@ -240,6 +257,10 @@ class DashboardController extends Controller
                 'nama'         => $getName->nama_marketing ?? '-',
             ];
         }
+
+        $period = DashboardPeriod::fromRequest(request());
+        $period->apply($query);
+        $viewData['period'] = $period;
 
         if (request()->ajax()) {
             Carbon::setLocale('id');
@@ -312,14 +333,12 @@ class DashboardController extends Controller
                 ->addIndexColumn()
                 ->addColumn('panjang', function ($row) {
                     return '
-                        <p>pjg kanan: <strong>' . $row->panjang_kanan . ' m</strong></p>
-                        <p>pjg kiri: <strong>' . $row->panjang_kiri . ' m</strong></p>
+                        <p>Panjang: <strong>' . $row->panjang . ' m</strong></p>
                     ';
                 })
                 ->addColumn('lebar', function ($row) {
                     return '
-                        <p>lebar depan: <strong>' . $row->lebar_depan . ' m</strong></p>
-                        <p>lebar belakang: <strong>' . $row->lebar_belakang . ' m</strong></p>
+                        <p>Lebar: <strong>' . $row->lebar . ' m</strong></p>
                     ';
                 })
                 ->addColumn('luas', function ($row) {

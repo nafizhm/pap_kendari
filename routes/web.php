@@ -26,7 +26,6 @@ use App\Http\Controllers\Master\LokasiKavlingController;
 use App\Http\Controllers\Master\NotarisController;
 use App\Http\Controllers\Master\PerusahaanController;
 use App\Http\Controllers\Master\RetensiController;
-use App\Http\Controllers\Master\UploadTemplateController;
 use App\Http\Controllers\PanduanAplikasiController;
 use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\PengajuanHoldController;
@@ -37,10 +36,8 @@ use App\Http\Controllers\Pengaturan\LogAktivitasController;
 use App\Http\Controllers\Pengaturan\PengaturanMediaController;
 use App\Http\Controllers\Pengaturan\PengaturanPenggunaController;
 use App\Http\Controllers\Pengaturan\PengaturanProfilController;
-use App\Http\Controllers\Pengaturan\RoleUserController;
 use App\Http\Controllers\Siteplan\SiteplanPenjualanController;
 use App\Http\Controllers\Siteplan\SiteplanListrikController;
-use App\Http\Controllers\Siteplan\SiteplanBphtbSSPController;
 use App\Http\Controllers\Siteplan\SiteplanAirController;
 use App\Http\Controllers\Siteplan\BalikNamaController;
 use App\Http\Controllers\Siteplan\SiteplanBalikNamaController;
@@ -132,7 +129,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('admin/beranda', [BerandaController::class, 'index'])->name('beranda.index');
 
     Route::prefix('admin')->controller(DashboardController::class)->group(function () {
-        Route::get('/dashboard', 'dashboard')->name('dashboard.index');
+        Route::get('/dashboard', fn (\Illuminate\Http\Request $request) => redirect()->route('beranda.index', $request->query()))->name('dashboard.index');
         Route::get('/dashboard/lokasi-penjualan/{id}', 'showLokasiPenjualan')->name('dashboard.lokasi-penjualan-show');
         Route::get('/dashboard/customer-status-progres/{id}', 'showCustomer')->name('dashboard.customer-status-progres-show');
         Route::get('/dashboard/customer-bank/{id}', 'showCustomer')->name('dashboard.customer-bank-show');
@@ -148,10 +145,6 @@ Route::middleware(['auth'])->group(function () {
             Route::get('st-balik-nama/cetak/pdf/{id_lokasi}', [SiteplanBalikNamaController::class, 'cetakPDF'])->name('st-balik-nama.cetak.pdf');
             Route::get('st-balik-nama/cetak/jpg/{id_lokasi}', [SiteplanBalikNamaController::class, 'cetakJPG'])->name('st-balik-nama.cetak.jpg');
             Route::resource('st-balik-nama', SiteplanBalikNamaController::class);
-
-            Route::get('st-bphtb-ssp/cetak/pdf/{id_lokasi}', [SiteplanBphtbSSPController::class, 'cetakPDF'])->name('st-bphtb-ssp.cetak.pdf');
-            Route::get('st-bphtb-ssp/cetak/jpg/{id_lokasi}', [SiteplanBphtbSSPController::class, 'cetakJPG'])->name('st-bphtb-ssp.cetak.jpg');
-            Route::resource('st-bphtb-ssp', SiteplanBphtbSSPController::class);
 
             Route::get('siteplan-air/cetak/pdf/{id_lokasi}', [SiteplanAirController::class, 'cetakPDF'])->name('siteplan-air.cetak.pdf');
             Route::get('siteplan-air/cetak/jpg/{id_lokasi}', [SiteplanAirController::class, 'cetakJPG'])->name('siteplan-air.cetak.jpg');
@@ -323,7 +316,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('bank/data/list', [BankTransaksiController::class, 'getBankList'])->name('bank.list');
         Route::resource('retensi', RetensiController::class);
         Route::resource('notaris', NotarisController::class);
-        Route::resource('upload-template', UploadTemplateController::class);
         Route::resource('jenis-berkas', JenisBerkasController::class)->only(['index', 'store', 'edit', 'update', 'destroy']);
     });
 
@@ -336,9 +328,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('hak-akses', HakAksesController::class);
         Route::get('get-hak-akses', [HakAksesController::class, 'getHakAkses'])->name('admin.getHakAkses');
         Route::put('updateHakAkses', [HakAksesController::class, 'updateHakAkses'])->name('admin.updateHakAkses');
-        Route::resource('role-user', RoleUserController::class);
-        Route::get('get-role-user', [RoleUserController::class, 'getRoleUser'])->name('admin.getRoleUser');
-        Route::put('updateRoleUser', [RoleUserController::class, 'updateRoleUser'])->name('admin.updateRoleUser');
+
         Route::resource('log-aktivitas', LogAktivitasController::class)->only(['index']);
     });
 

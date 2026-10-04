@@ -308,6 +308,7 @@
                         @endphp
 
                         @foreach ($menus as $menu)
+                            @continue($menu->route_name === 'dashboard.index')
                             @php
                                 $children = $menu->children->filter(fn ($child) => RouteFacade::has($child->route_name));
                                 $hasMenuRoute = RouteFacade::has($menu->route_name);

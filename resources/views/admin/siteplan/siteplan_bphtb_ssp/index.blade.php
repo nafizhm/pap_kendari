@@ -301,20 +301,10 @@
                                     </div>
 
                                     <div class="form-group row">
-                                        <label class="col-sm-2 col-form-label">Panjang Kanan</label>
+                                        <label class="col-sm-2 col-form-label">Panjang</label>
                                         <div class="col-sm-3">
                                             <div class="input-group">
-                                                <input type="text" name="panjang_kanan" id="panjang_kanan"
-                                                    class="form-control format-decimal" readonly>
-                                                <div class="input-group-append">
-                                                    <span class="input-group-text">m</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <label class="col-sm-2 col-form-label">Panjang Kiri</label>
-                                        <div class="col-sm-3">
-                                            <div class="input-group">
-                                                <input type="text" name="panjang_kiri" id="panjang_kiri"
+                                                <input type="text" name="panjang" id="panjang"
                                                     class="form-control format-decimal" readonly>
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">m</span>
@@ -324,20 +314,10 @@
                                     </div>
 
                                     <div class="form-group row">
-                                        <label class="col-sm-2 col-form-label">Lebar Depan</label>
+                                        <label class="col-sm-2 col-form-label">Lebar</label>
                                         <div class="col-sm-3">
                                             <div class="input-group">
-                                                <input type="text" name="lebar_depan" id="lebar_depan"
-                                                    class="form-control format-decimal" readonly>
-                                                <div class="input-group-append">
-                                                    <span class="input-group-text">m</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <label class="col-sm-2 col-form-label">Lebar Belakang</label>
-                                        <div class="col-sm-3">
-                                            <div class="input-group">
-                                                <input type="text" name="lebar_belakang" id="lebar_belakang"
+                                                <input type="text" name="lebar" id="lebar"
                                                     class="form-control format-decimal" readonly>
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">m</span>
@@ -570,10 +550,8 @@
 
                     $('#nama_kavling').val(response.data.lokasi.nama_kavling);
                     $('#kode_kavling').val(response.data.kode_kavling);
-                    $('#panjang_kanan').val(response.data.panjang_kanan);
-                    $('#panjang_kiri').val(response.data.panjang_kiri);
-                    $('#lebar_depan').val(response.data.lebar_depan);
-                    $('#lebar_belakang').val(response.data.lebar_belakang);
+                    $('#panjang').val(response.data.panjang);
+                    $('#lebar').val(response.data.lebar);
                     $('#luas_tanah').val(response.data.luas_tanah);
                     $('#luas_bangunan').val(response.data.luas_bangunan);
                     $('#hrg_meter').val(formatNumber(response.data.hrg_meter));

@@ -167,8 +167,8 @@
         $('#unitType').text(siteplanValue(unit.tipe_bangunan));
         siteplanDetails('#unitSpecifications', [
             ['Perumahan', unit.lokasi?.nama_kavling], ['Blok / Kavling', unit.kode_kavling],
-            ['Panjang kanan', siteplanMeasure(unit.panjang_kanan, 'm')], ['Panjang kiri', siteplanMeasure(unit.panjang_kiri, 'm')],
-            ['Lebar depan', siteplanMeasure(unit.lebar_depan, 'm')], ['Lebar belakang', siteplanMeasure(unit.lebar_belakang, 'm')],
+            ['Panjang', siteplanMeasure(unit.panjang, 'm')],
+            ['Lebar', siteplanMeasure(unit.lebar, 'm')],
             ['Daya listrik', siteplanMeasure(unit.daya_listrik, 'VA')], ['Harga per m²', siteplanMoney(unit.hrg_meter)]
         ]);
         siteplanDetails('#unitLegal', [['ID Rumah Sikumbang', unit.id_rumah_sikumbang], ['No. Sertipikat', unit.no_sertifikat], ['Keterangan', unit.keterangan]]);

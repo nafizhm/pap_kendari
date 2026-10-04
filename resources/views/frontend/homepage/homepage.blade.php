@@ -69,7 +69,7 @@
                 @endforeach
                 <li>
                     @if (Auth::guard('web')->check())
-                        <a href="{{ route('dashboard.index') }}" class="custom-navbar-active">Masuk</a>
+                        <a href="{{ route('beranda.index') }}" class="custom-navbar-active">Masuk</a>
                     @else
                         <a href="{{ route('login') }}"
                             class="{{ request()->routeIs('login') ? 'custom-navbar-active' : '' }}">

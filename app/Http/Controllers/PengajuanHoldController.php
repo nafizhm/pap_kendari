@@ -880,7 +880,6 @@ class PengajuanHoldController extends Controller
 
         $customer = Customer::create($cust);
 
-        KavlingPeta::find($data->id_kavling)->update(['id_customer' => $customer->id]);
 
         PersyaratanLegal::create([
             'id_customer' => $customer->id,

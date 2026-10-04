@@ -397,11 +397,6 @@ class CustomerController extends Controller
             ]);
 
             $kavling = KavlingPeta::find($data->id_kavling);
-            if ($kavling) {
-
-                $kavling->id_customer = 0;
-                $kavling->save();
-            }
 
             $this->logDelete('Customer', $data->id);
             $data->delete();

@@ -63,7 +63,6 @@ class PerusahaanController extends Controller
             'nama_penandatangan'    => 'required|string|max:50',
             'jabatan_penandatangan' => 'required|string|max:50',
             'nama_mengetahui'       => 'required|string|max:50',
-            'bg_kwitansi'           => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
             'kop_surat'             => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ], [
             'nama_perusahaan.required'       => 'Nama perusahaan wajib diisi.',
@@ -85,17 +84,9 @@ class PerusahaanController extends Controller
                 'nama_penandatangan'    => $request->nama_penandatangan,
                 'jabatan_penandatangan' => $request->jabatan_penandatangan,
                 'nama_mengetahui'       => $request->nama_mengetahui,
-                'bg_kwitansi'           => $request->bg_kwitansi ?? '',
+                'bg_kwitansi'           => '', // Kolom lama wajib diisi pada skema perusahaan.
                 'kop_surat'             => $request->kop_surat ?? '',
             ];
-
-            if ($request->hasFile('bg_kwitansi')) {
-                $file     = $request->file('bg_kwitansi');
-                $ext      = $file->getClientOriginalExtension();
-                $filename = Str::random(25) . '.' . $ext;
-                $file->move(public_path('assets/lokasi_perumahan/bg_kwitansi/'), $filename);
-                $data['bg_kwitansi'] = $filename;
-            }
 
             if ($request->hasFile('kop_surat')) {
                 $file     = $request->file('kop_surat');
@@ -160,7 +151,6 @@ class PerusahaanController extends Controller
             'nama_penandatangan'    => 'required|string|max:50',
             'jabatan_penandatangan' => 'required|string|max:50',
             'nama_mengetahui'       => 'required|string|max:50',
-            'bg_kwitansi'           => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
             'kop_surat'             => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:2048',
         ]);
 
@@ -183,24 +173,8 @@ class PerusahaanController extends Controller
                 'nama_penandatangan'    => $request->nama_penandatangan,
                 'jabatan_penandatangan' => $request->jabatan_penandatangan,
                 'nama_mengetahui'       => $request->nama_mengetahui,
-                'bg_kwitansi'           => $perusahaan->bg_kwitansi,
                 'kop_surat'             => $perusahaan->kop_surat,
             ];
-
-            // Handle Kwitansi
-            if ($request->hasFile('bg_kwitansi')) {
-                $file     = $request->file('bg_kwitansi');
-                $ext      = $file->getClientOriginalExtension();
-                $filename = Str::random(25) . '.' . $ext;
-                $file->move(public_path('assets/lokasi_perumahan/bg_kwitansi/'), $filename);
-
-                // hapus file lama kalau ada
-                if ($perusahaan->bg_kwitansi && file_exists(public_path('assets/lokasi_perumahan/bg_kwitansi/' . $perusahaan->bg_kwitansi))) {
-                    unlink(public_path('assets/lokasi_perumahan/bg_kwitansi/' . $perusahaan->bg_kwitansi));
-                }
-
-                $data['bg_kwitansi'] = $filename;
-            }
 
             // Handle Kop Surat
             if ($request->hasFile('kop_surat')) {

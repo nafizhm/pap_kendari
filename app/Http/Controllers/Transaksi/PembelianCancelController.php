@@ -145,8 +145,6 @@ class PembelianCancelController extends Controller
                 'keterangan'            => 'Pembatalan Pembelian Unit ' . $customer->lokasi->nama_kavling . ' - ' . $customer->kavling->kode_kavling . ' atas nama ' . $customer->nama_lengkap,
             ]);
 
-            $customer->kavling->id_customer = null;
-            $customer->kavling->save();
 
             $customer->stt_arsip  = 1;
             $customer->id_kavling = null;
@@ -189,8 +187,6 @@ class PembelianCancelController extends Controller
 
             if ($kavling && $customer) {
 
-                $kavling->id_customer = $customer->id;
-                $kavling->save();
 
                 $customer->id_kavling = $kavling->id;
                 $customer->save();

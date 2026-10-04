@@ -86,15 +86,10 @@ class SPPRController extends Controller
             $blok = '';
             $no = '';
             if ($customer->kavling) {
-                if ($customer->lokasi && $customer->lokasi->is_cluster) {
-                    $blok = $customer->kavling->cluster ?? '';
-                    $no = $customer->kavling->no ?? '';
-                } else {
-                    $kode = $customer->kavling->kode_kavling ?? '';
-                    $parts = explode('-', $kode);
-                    $blok = $parts[0] ?? $kode;
-                    $no = $parts[1] ?? '';
-                }
+                $kode = $customer->kavling->kode_kavling ?? '';
+                $parts = explode('-', $kode);
+                $blok = $parts[0] ?? $kode;
+                $no = $parts[1] ?? '';
             }
 
             return response()->json([

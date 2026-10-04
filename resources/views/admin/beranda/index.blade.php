@@ -557,15 +557,17 @@
       <header class="topbar">
         <div class="title">
           <h1>Selamat datang, {{ $username ?? 'dev' }}</h1>
-          <p>Ringkasan penjualan dan aktivitas hari ini</p>
+          <p>Ringkasan penjualan dan aktivitas ? {{ $period->label }}</p>
         </div>
 
         <div class="top-actions">
           <button class="icon-btn"><i class="fa-regular fa-bell"></i></button>
           <button class="icon-btn"><i class="fa-regular fa-calendar"></i></button>
-          <button class="date-btn"><i class="fa-regular fa-calendar-days"></i> 26 Juli 2026</button>
+          <button class="date-btn"><i class="fa-regular fa-calendar-days"></i> {{ now('Asia/Jakarta')->locale('id')->translatedFormat('j F Y') }}</button>
         </div>
       </header>
+
+      @include('admin.beranda.period-filter')
 
       <section class="kpi-grid">
         <article class="kpi-card">
@@ -587,8 +589,8 @@
         <article class="kpi-card">
           <div class="kpi-icon orange"><i class="fa-solid fa-wallet"></i></div>
           <div>
-            <div class="kpi-label">Booking Fee Hari Ini</div>
-            <div class="kpi-value money" style="color:#f97316">Rp {{ number_format($summaryMetrics['booking_fee_hari_ini'] ?? 0, 0, ',', '.') }}</div>
+            <div class="kpi-label">Booking Fee ? {{ $period->label }}</div>
+            <div class="kpi-value money" style="color:#f97316">Rp {{ number_format($summaryMetrics['booking_fee'] ?? 0, 0, ',', '.') }}</div>
           </div>
         </article>
 
@@ -714,6 +716,9 @@
             <div class="section-head">
               <h2>Grafik Penjualan Bulanan <span>(Semua Project)</span></h2>
               <form method="GET" action="{{ route('beranda.index') }}">
+                @foreach ($period->parameters() as $key => $value)
+                  <input type="hidden" name="{{ $key }}" value="{{ $value }}">
+                @endforeach
                 <label for="sales-year" class="sr-only">Tahun grafik penjualan</label>
                 <input id="sales-year" class="filter-btn" type="number" name="sales_year" min="2000" max="2100" value="{{ $salesYear }}" style="width:95px">
                 <button class="filter-btn" type="submit">Tampilkan</button>

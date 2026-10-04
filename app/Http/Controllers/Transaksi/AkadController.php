@@ -485,8 +485,8 @@ class AkadController extends Controller
         $template->setValue('hari', $hari);
         $template->setValue('tanggal_bulan', $tanggalBulan);
         $template->setValue('tahun', $tahun);
-        $template->setValue('lebar', $kavling->lebar_depan . ' x ' . $kavling->lebar_belakang);
-        $template->setValue('panjang', $kavling->panjang_kanan . ' x ' . $kavling->panjang_kiri);
+        $template->setValue('lebar', $kavling->lebar);
+        $template->setValue('panjang', $kavling->panjang);
         $template->setValue('luas_tanah', $kavling->luas_tanah);
         $template->setValue('no_blok', $kavling->kode_kavling);
         $template->setValue('hrg_jual', number_format($hrgJual, 0, ',', '.'));

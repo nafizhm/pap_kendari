@@ -41,8 +41,8 @@ class PublicSiteplanController extends Controller
     {
         $data = KavlingPeta::withBookingState()->with(['lokasi', 'customer', 'listrikAir'])->findOrFail($id);
 
-        $tagihanList   = Piutang::where('id_customer', $data->id_customer)->orderBy('id')->get();
-        $pemasukanList = Pemasukan::with('kategori')->where('id_customer', $data->id_customer)->get();
+        $tagihanList   = $data->customer ? Piutang::where('id_customer', $data->customer->id)->orderBy('id')->get() : collect();
+        $pemasukanList = $data->customer ? Pemasukan::with('kategori')->where('id_customer', $data->customer->id)->get() : collect();
 
         return response()->json([
             'success'         => true,

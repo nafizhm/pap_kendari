@@ -117,19 +117,6 @@
                         </div>
 
                         <div class="form-group row">
-                            <label class="col-sm-4 col-form-label">Kwitansi</label>
-                            <div class="col-sm-4">
-                                <input type="file" class="mb-2" id="bg_kwitansi" name="bg_kwitansi"
-                                    accept=".jpg, .jpeg, .png, .pdf">
-                                <div class="img-thumbnail mb-2 d-flex align-items-center justify-content-center"
-                                    id="previewKwitansi"
-                                    style="max-width: 150px; height: 150px; background-color: #f8f9fa; border: 1px solid #dee2e6; overflow: hidden;">
-                                    <span style="color: #6c757d;">Tidak ada berkas</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
                             <label class="col-sm-4 col-form-label">Kop Surat</label>
                             <div class="col-sm-4">
                                 <input type="file" class="mb-2" id="kop_surat" name="kop_surat"
@@ -161,7 +148,6 @@
 
 @push('scripts')
     <script>
-        previewFile('bg_kwitansi', 'previewKwitansi');
         previewFile('kop_surat', 'previewKopSurat');
 
         const permissions = @json($permissions);
@@ -246,7 +232,6 @@
             submitBtn.prop('disabled', false);
 
             $('#previewKopSurat').html('<span style="color: #6c757d;">Tidak ada Kop Surat</span>');
-            $('#previewKwitansi').html('<span style="color: #6c757d;">Tidak ada Kwitansi</span>');
         });
 
         $('#formData').on('submit', function(e) {

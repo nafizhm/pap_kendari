@@ -75,10 +75,12 @@ class DocumentDataContext
             'hrg_jual'                => $kavling->hrg_jual
                 ? number_format($kavling->hrg_jual, 0, ',', '.')
                 : '0',
-            'lebar_depan'             => (string) ($kavling->lebar_depan ?? '-'),
-            'lebar_belakang'          => (string) ($kavling->lebar_belakang ?? '-'),
-            'panjang_kanan'           => (string) ($kavling->panjang_kanan ?? '-'),
-            'panjang_kiri'            => (string) ($kavling->panjang_kiri ?? '-'),
+            'panjang'                => (string) ($kavling->panjang ?? '-'),
+            'lebar'                  => (string) ($kavling->lebar ?? '-'),
+            'lebar_depan'             => (string) ($kavling->lebar ?? '-'),
+            'lebar_belakang'          => (string) ($kavling->lebar ?? '-'),
+            'panjang_kanan'           => (string) ($kavling->panjang ?? '-'),
+            'panjang_kiri'            => (string) ($kavling->panjang ?? '-'),
             'blok_kavling'            => $kavling->kode_kavling ?? '-',
             'tipe'                    => (string) ($kavling->tipe_bangunan ?? '-'),
             'luas_tanah_standar'      => (string) ($kavling->luas_tanah ?? '-'),
@@ -168,7 +170,7 @@ class DocumentDataContext
                 'tipe_rumah', 'tipe', 'luas_tanah', 'luas_tanah_standar',
                 'luas_bangunan', 'daya_listrik',
                 'harga_jual', 'harga_jual_terbilang', 'hrg_jual',
-                'lebar_depan', 'lebar_belakang', 'panjang_kanan', 'panjang_kiri',
+                'panjang', 'lebar', 'lebar_depan', 'lebar_belakang', 'panjang_kanan', 'panjang_kiri',
                 'blok_kavling', 'lebihan_luas',
             ],
             'Lokasi' => [

@@ -74,22 +74,6 @@
                         </div>
 
                         <div class="form-group row">
-                            <label class="col-sm-2 col-form-label">Header</label>
-                            <div class="col-sm-5">
-                                <input type="text" name="header" id="header" class="form-control">
-                            </div>
-                            <label for="stt_tampil" class="col-sm-2 col-form-label">Status</label>
-                            <div class="col-sm-3">
-                                <select name="stt_tampil" id="stt_tampil" class="form-control select-status">
-                                    <option value=""></option>
-                                    <option value="1">Penjualan</option>
-                                    <option value="2">Proyek</option>
-                                    <option value="3">Keduanya</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
                             <label class="col-sm-2 col-form-label">Alamat</label>
                             <div class="col-sm-8">
                                 <textarea name="alamat" id="alamat" class="form-control" rows="3"></textarea>
@@ -110,14 +94,6 @@
                         </div>
 
                         <div class="form-group row">
-                            <label for="is_cluster" class="col-sm-2 col-form-label">Cluster</label>
-                            <div class="col-sm-4">
-                                <select name="is_cluster" id="is_cluster" class="form-control select-cluster">
-                                    <option value=""></option>
-                                    <option value="1">Ya (Cluster)</option>
-                                    <option value="0">Tidak (Non-Cluster)</option>
-                                </select>
-                            </div>
                             <label class="col-sm-2 col-form-label">Urutan Lokasi</label>
                             <div class="col-sm-3">
                                 <input type="number" name="urutan" id="urutan" class="form-control">
@@ -187,11 +163,6 @@
         const showActionColumn = permissions['edit'] == 1 || permissions['hapus'] == 1;
 
         $(document).ready(function() {
-            $('.select-status').select2({
-                theme: 'bootstrap4',
-                placeholder: 'Pilih Status',
-                minimumResultsForSearch: Infinity
-            });
             $('.select-reset').select2({
                 theme: 'bootstrap4',
                 placeholder: 'Pilih',
@@ -203,11 +174,6 @@
                 placeholder: "Pilih Perusahaan",
             });
 
-            $('.select-cluster').select2({
-                theme: 'bootstrap4',
-                placeholder: 'Pilih Cluster',
-                minimumResultsForSearch: Infinity
-            });
         });
 
         $(function() {
@@ -264,15 +230,12 @@
                     $('#primary_id').val(response.data.id);
                     $('#nama_kavling').val(response.data.nama_kavling);
                     $('#nama_singkat').val(response.data.nama_singkat);
-                    $('#header').val(response.data.header);
                     $('#alamat').val(response.data.alamat);
                     $('#urutan').val(response.data.urutan);
                     $('#no_kwitansi').val(response.data.no_kwitansi);
                     $('#no_bast').val(response.data.no_bast);
                     $('#no_ppjb').val(response.data.no_ppjb);
                     $('#reset_nomor').val(response.data.reset_nomor).trigger('change');
-                    $('#stt_tampil').val(response.data.stt_tampil).trigger('change');
-                    $('#is_cluster').val(response.data.is_cluster).trigger('change');
 
                     if (response.data.perusahaan) {
                         let perusahaanIds = response.data.perusahaan.map(p => p.id_perusahaan);
@@ -291,8 +254,6 @@
             $('.invalid-feedback').remove();
 
             $('#primary_id').val('');
-            $('#stt_tampil').val('').trigger('change');
-            $('#is_cluster').val('').trigger('change');
             $('#reset_nomor').val('').trigger('change');
 
             $('#id_perusahaan').val(null).trigger('change.select2');
