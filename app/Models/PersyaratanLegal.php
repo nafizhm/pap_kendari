@@ -23,12 +23,14 @@ class PersyaratanLegal extends Model
         'FOTO_SIKASEP',
         'TRILOGI',
         'status_jenis_berkas',
+        'file_jenis_berkas',
         'catatan_kekurangan',
         'percakapan_wa',
     ];
 
     protected $casts = [
         'status_jenis_berkas' => 'array',
+        'file_jenis_berkas' => 'array',
     ];
 
     public function customer()

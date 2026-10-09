@@ -30,6 +30,22 @@ class PengajuanHoldTempo extends Model
         'no_bpjs_kes',
         'nama_saudara',
         'no_telp_saudara',
+        'kontak_darurat_1',
+        'nama_pemilik_kontak_darurat_1',
+        'keterangan_kontak_darurat_1',
+        'kontak_darurat_2',
+        'nama_pemilik_kontak_darurat_2',
+        'keterangan_kontak_darurat_2',
+        'kontak_darurat_3',
+        'nama_pemilik_kontak_darurat_3',
+        'keterangan_kontak_darurat_3',
+        'kontak_darurat_4',
+        'nama_pemilik_kontak_darurat_4',
+        'keterangan_kontak_darurat_4',
+        'kontak_darurat_5',
+        'nama_pemilik_kontak_darurat_5',
+        'keterangan_kontak_darurat_5',
+
         'foto_ktp',
         'foto_npwp',
         'foto_kk',
@@ -38,6 +54,7 @@ class PengajuanHoldTempo extends Model
         'foto_ktp_p',
         'booking_fee',
         'file_bukti',
+        'berkas_booking',
         'id_marketing',
         'id_lokasi',
         'id_kavling',
@@ -60,6 +77,8 @@ class PengajuanHoldTempo extends Model
         'id_pengajuan_hold',
         'id_user',
     ];
+
+    protected $casts = ['berkas_booking' => 'array'];
 
     public $timestamps = false;
 

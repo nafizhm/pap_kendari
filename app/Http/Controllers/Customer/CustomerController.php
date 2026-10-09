@@ -33,7 +33,7 @@ class CustomerController extends Controller
         Carbon::setLocale('id');
 
         if ($request->ajax()) {
-            $data = Customer::with([
+            $data = Customer::withProgressDates()->with([
                 'marketing',
                 'lokasi',
                 'kavling',
@@ -84,7 +84,12 @@ class CustomerController extends Controller
 
                     $cashbackText = $ketCashback ? '<br><small>' . $ketCashback . '</small>' : '';
 
-                    return $statusDisplay . $cashbackText;
+                    $tanggal = $row->tanggal_progres
+                        ? Carbon::parse($row->tanggal_progres)->locale('id')->translatedFormat('d F Y')
+                        : '-';
+                    $tanggalText = '<br><small class="text-muted">' . e($tanggal) . '</small>';
+
+                    return $statusDisplay . $tanggalText . $cashbackText;
                 })
                 ->editColumn('nama_lengkap', function ($row) {
                     $nama = '<strong>' . $row->nama_lengkap . '</strong>';

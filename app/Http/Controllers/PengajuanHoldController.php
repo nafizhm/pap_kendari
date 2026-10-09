@@ -10,6 +10,8 @@ use App\Models\MarketingOffline;
 use App\Models\MetodeBayar;
 use App\Models\Pemasukan;
 use App\Models\PengajuanHold;
+use App\Models\BerkasBooking;
+use App\Services\BookingAttachments;
 use App\Models\PengajuanHoldTempo;
 use App\Models\PersyaratanLegal;
 use App\Models\Piutang;
@@ -240,6 +242,22 @@ class PengajuanHoldController extends Controller
         ]);
 
         $request->validate([
+            'kontak_darurat_1' => 'nullable|string|max:255',
+            'nama_pemilik_kontak_darurat_1' => 'nullable|string|max:255',
+            'keterangan_kontak_darurat_1' => 'nullable|string|max:255',
+            'kontak_darurat_2' => 'nullable|string|max:255',
+            'nama_pemilik_kontak_darurat_2' => 'nullable|string|max:255',
+            'keterangan_kontak_darurat_2' => 'nullable|string|max:255',
+            'kontak_darurat_3' => 'nullable|string|max:255',
+            'nama_pemilik_kontak_darurat_3' => 'nullable|string|max:255',
+            'keterangan_kontak_darurat_3' => 'nullable|string|max:255',
+            'kontak_darurat_4' => 'nullable|string|max:255',
+            'nama_pemilik_kontak_darurat_4' => 'nullable|string|max:255',
+            'keterangan_kontak_darurat_4' => 'nullable|string|max:255',
+            'kontak_darurat_5' => 'nullable|string|max:255',
+            'nama_pemilik_kontak_darurat_5' => 'nullable|string|max:255',
+            'keterangan_kontak_darurat_5' => 'nullable|string|max:255',
+
             'nama_lengkap'     => 'required',
             'nik'              => 'required',
             'tempat_lahir'     => 'required',
@@ -298,6 +316,21 @@ class PengajuanHoldController extends Controller
                 'nik_p'             => $request->nik_p,
                 'nama_saudara'      => $request->nama_saudara,
                 'no_telp_saudara'   => $request->no_telp_saudara,
+                'kontak_darurat_1' => $request->kontak_darurat_1,
+                'nama_pemilik_kontak_darurat_1' => $request->nama_pemilik_kontak_darurat_1,
+                'keterangan_kontak_darurat_1' => $request->keterangan_kontak_darurat_1,
+                'kontak_darurat_2' => $request->kontak_darurat_2,
+                'nama_pemilik_kontak_darurat_2' => $request->nama_pemilik_kontak_darurat_2,
+                'keterangan_kontak_darurat_2' => $request->keterangan_kontak_darurat_2,
+                'kontak_darurat_3' => $request->kontak_darurat_3,
+                'nama_pemilik_kontak_darurat_3' => $request->nama_pemilik_kontak_darurat_3,
+                'keterangan_kontak_darurat_3' => $request->keterangan_kontak_darurat_3,
+                'kontak_darurat_4' => $request->kontak_darurat_4,
+                'nama_pemilik_kontak_darurat_4' => $request->nama_pemilik_kontak_darurat_4,
+                'keterangan_kontak_darurat_4' => $request->keterangan_kontak_darurat_4,
+                'kontak_darurat_5' => $request->kontak_darurat_5,
+                'nama_pemilik_kontak_darurat_5' => $request->nama_pemilik_kontak_darurat_5,
+                'keterangan_kontak_darurat_5' => $request->keterangan_kontak_darurat_5,
                 'no_bpjs_kes'       => $request->no_bpjs_kes,
                 'id_lokasi'         => $request->id_lokasi,
                 'id_kavling'        => $request->id_kavling,
@@ -370,103 +403,40 @@ class PengajuanHoldController extends Controller
     {
         $data = PengajuanHold::findOrFail($id);
 
-        $fotoKtpRule = empty($data->foto_ktp) ? 'required|mimes:jpg,jpeg,png' : 'nullable|mimes:jpg,jpeg,png';
-
-        $rules = [
-            'foto_ktp'     => $fotoKtpRule,
-            'foto_npwp'    => 'nullable|mimes:jpg,jpeg,png',
-            'foto_kk'      => 'nullable|mimes:jpg,jpeg,png',
-            'foto_bpjs'    => 'nullable|mimes:jpg,jpeg,png',
-            'foto_ktp_p'   => 'nullable|mimes:jpg,jpeg,png',
-            'file_bukti'   => 'nullable|mimes:jpg,jpeg,png,pdf',
-            'foto_pemohon' => 'nullable|mimes:jpg,jpeg,png',
-        ];
-
-        $messages = [
-            'foto_ktp.required'  => 'Foto KTP wajib diunggah.',
-            'foto_ktp.mimes'     => 'Foto KTP harus berformat JPG atau PNG.',
-            'foto_npwp.mimes'    => 'Foto NPWP harus berformat JPG atau PNG.',
-            'foto_kk.mimes'      => 'Foto KK harus berformat JPG atau PNG.',
-            'foto_bpjs.mimes'    => 'Foto BPJS harus berformat JPG atau PNG.',
-            'foto_ktp_p.mimes'   => 'Foto KTP pasangan harus berformat JPG atau PNG.',
-            'file_bukti.mimes'   => 'File bukti harus berformat JPG, PNG, atau PDF.',
-            'foto_pemohon.mimes' => 'Foto pemohon harus berformat JPG atau PNG.',
-        ];
-
-        $request->validate($rules, $messages);
-
+        $attachments = app(BookingAttachments::class);
+        abort_if((int) $data->stt_reg === 2, 422, 'Booking sudah disetujui.');
+        $request->validate($attachments->rules($data), [], $attachments->attributes($data));
+        $newFiles = [];
+        $obsoleteFiles = [];
         DB::beginTransaction();
         try {
-
-            $folder = public_path('assets/booking');
-
-            if (! file_exists($folder)) {
-                mkdir($folder, 0777, true);
-            }
-
-            $nama_file_ktp     = $this->simpanFile($request->file('foto_ktp'), $folder);
-            $nama_file_npwp    = $this->simpanFile($request->file('foto_npwp'), $folder);
-            $nama_file_kk      = $this->simpanFile($request->file('foto_kk'), $folder);
-            $nama_file_bpjs    = $this->simpanFile($request->file('foto_bpjs'), $folder);
-            $nama_file_bukti   = $this->simpanFile($request->file('file_bukti'), $folder);
-            $nama_file_pemohon = $this->simpanFile($request->file('foto_pemohon'), $folder);
-            $nama_file_ktp_p   = $this->simpanFile($request->file('foto_ktp_p'), $folder);
-
-            $nama_file_ktp_p = null;
-            if ($request->hasFile('foto_ktp_p')) {
-                $nama_file_ktp_p = $this->simpanFile($request->file('foto_ktp_p'), $folder);
-            }
-
-            $db = [
-                'foto_ktp'     => $nama_file_ktp ?? $data->foto_ktp,
-                'foto_npwp'    => $nama_file_npwp ?? $data->foto_npwp,
-                'foto_kk'      => $nama_file_kk ?? $data->foto_kk,
-                'foto_bpjs'    => $nama_file_bpjs ?? $data->foto_bpjs,
-                'foto_ktp_p'   => $nama_file_ktp_p ?? $data->foto_ktp_p,
-                'file_bukti'   => $nama_file_bukti ?? $data->file_bukti,
-                'foto_pemohon' => $nama_file_pemohon ?? $data->foto_pemohon,
-            ];
-
-            $data->update($db);
-
+            $data->update($attachments->save($request, $data, $newFiles, $obsoleteFiles));
             DB::commit();
-
-            return response()->json([
-                'status' => 'success',
-            ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
-            Log::info($e->getMessage());
-
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'Gagal memperbarui Booking.',
-                'error'   => $e->getMessage(),
-            ], 500);
+            File::delete(array_map(fn ($file) => public_path('assets/booking/' . $file), $newFiles));
+            throw $e;
         }
+        File::delete($obsoleteFiles);
+        return response()->json(['status' => 'success']);
     }
 
     public function deleteFile(Request $request, $id)
     {
-        $field   = $request->input('field');
-        $allowed = ['foto_pemohon', 'foto_ktp_p', 'file_bukti', 'foto_ktp', 'foto_npwp', 'foto_kk', 'foto_bpjs'];
-
-        if (! in_array($field, $allowed)) {
-            return response()->json(['success' => false]);
-        }
-
         $data = PengajuanHold::findOrFail($id);
-
-        if ($data->$field) {
-            $filePath = public_path('assets/booking/' . $data->$field);
-            if (file_exists($filePath)) {
-                unlink($filePath);
-            }
-
-            $data->$field = null;
-            $data->save();
+        abort_if((int) $data->stt_reg === 2, 422, 'Booking sudah disetujui.');
+        $type = app(BookingAttachments::class)->definitions($data)->firstWhere('kode', $request->input('field'));
+        abort_unless($type, 422, 'Jenis berkas tidak valid.');
+        $filename = $type->filename($data);
+        if (array_key_exists($type->kode, BerkasBooking::LEGACY)) {
+            $data->{$type->kode} = null;
+        } else {
+            $custom = $data->berkas_booking ?? [];
+            unset($custom[$type->kode]);
+            $data->berkas_booking = $custom;
         }
-
+        $data->save();
+        if ($filename) File::delete(public_path('assets/booking/' . $filename));
         return response()->json(['success' => true]);
     }
 
@@ -540,7 +510,25 @@ class PengajuanHoldController extends Controller
             'total_harga' => $request->total_harga ? str_replace('.', '', $request->total_harga) : 0,
         ]);
 
+        $attachments = app(BookingAttachments::class);
+        $request->validate($attachments->rules(), [], $attachments->attributes());
         $request->validate([
+            'kontak_darurat_1' => 'nullable|string|max:255',
+            'nama_pemilik_kontak_darurat_1' => 'nullable|string|max:255',
+            'keterangan_kontak_darurat_1' => 'nullable|string|max:255',
+            'kontak_darurat_2' => 'nullable|string|max:255',
+            'nama_pemilik_kontak_darurat_2' => 'nullable|string|max:255',
+            'keterangan_kontak_darurat_2' => 'nullable|string|max:255',
+            'kontak_darurat_3' => 'nullable|string|max:255',
+            'nama_pemilik_kontak_darurat_3' => 'nullable|string|max:255',
+            'keterangan_kontak_darurat_3' => 'nullable|string|max:255',
+            'kontak_darurat_4' => 'nullable|string|max:255',
+            'nama_pemilik_kontak_darurat_4' => 'nullable|string|max:255',
+            'keterangan_kontak_darurat_4' => 'nullable|string|max:255',
+            'kontak_darurat_5' => 'nullable|string|max:255',
+            'nama_pemilik_kontak_darurat_5' => 'nullable|string|max:255',
+            'keterangan_kontak_darurat_5' => 'nullable|string|max:255',
+
             'nama_lengkap'     => 'required',
             'nik'              => 'required|digits:16',
             'tempat_lahir'     => 'required',
@@ -559,14 +547,14 @@ class PengajuanHoldController extends Controller
             'booking_fee'      => 'required|gt:0',
             'jenis_perumahan'  => 'required',
             'jenis_pembelian'  => 'required',
-            'foto_ktp'         => 'required|mimes:jpg,jpeg,png|max:2048',
-            'foto_npwp'        => 'nullable|mimes:jpg,jpeg,png|max:2048',
-            'foto_kk'          => 'nullable|mimes:jpg,jpeg,png|max:2048',
-            'foto_bpjs'        => 'nullable|mimes:jpg,jpeg,png|max:2048',
-            'foto_ktp_p'       => 'nullable|mimes:jpg,jpeg,png|max:2048',
-            'file_bukti'       => 'nullable|mimes:jpg,jpeg,png|max:2048',
-            'file_sppr'        => 'nullable|mimes:jpg,jpeg,png|max:2048',
-            'foto_pemohon'     => 'nullable|mimes:jpg,jpeg,png|max:2048',
+
+
+
+
+
+
+
+
         ], [
             'nama_lengkap.required'     => 'Nama lengkap wajib diisi.',
             'nik.required'              => 'NIK wajib diisi.',
@@ -593,21 +581,21 @@ class PengajuanHoldController extends Controller
             'booking_fee.gt'            => 'Booking fee harus lebih dari 0.',
             'jenis_perumahan.required'  => 'Jenis Perumahan wajib dipilih.',
             'jenis_pembelian.required'  => 'Jenis Pembelian wajib dipilih.',
-            'foto_ktp.required'         => 'Foto KTP wajib diunggah.',
-            'foto_ktp.mimes'            => 'Foto KTP harus berformat JPG atau PNG.',
-            'foto_ktp.max'              => 'Foto KTP maksimal 2 MB.',
-            'foto_npwp.mimes'           => 'Foto NPWP harus berformat JPG atau PNG.',
-            'foto_npwp.max'             => 'Foto NPWP maksimal 2 MB.',
-            'foto_kk.mimes'             => 'Foto KK harus berformat JPG atau PNG.',
-            'foto_kk.max'               => 'Foto KK maksimal 2 MB.',
-            'foto_bpjs.mimes'           => 'Foto BPJS harus berformat JPG atau PNG.',
-            'foto_bpjs.max'             => 'Foto BPJS maksimal 2 MB.',
-            'foto_ktp_p.mimes'          => 'Foto KTP pasangan harus berformat JPG atau PNG.',
-            'foto_ktp_p.max'            => 'Foto KTP pasangan maksimal 2 MB.',
-            'file_sppr.mimes'           => 'File SPPR harus berformat JPG atau PNG.',
-            'file_sppr.max'             => 'File SPPR maksimal 2 MB.',
-            'foto_pemohon.mimes'        => 'Foto pemohon harus berformat JPG atau PNG.',
-            'foto_pemohon.max'          => 'Foto pemohon maksimal 2 MB.',
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         ]);
 
         $kavling = KavlingPeta::find($request->id_kavling);
@@ -629,6 +617,8 @@ class PengajuanHoldController extends Controller
             ], 422);
         }
 
+        $newFiles = [];
+        $obsoleteFiles = [];
         DB::beginTransaction();
         try {
             $kavling = KavlingPeta::lockForUpdate()->findOrFail($request->id_kavling);
@@ -644,20 +634,7 @@ class PengajuanHoldController extends Controller
                 mkdir($folder, 0777, true);
             }
 
-            $files = [
-                'foto_ktp',
-                'foto_npwp',
-                'foto_kk',
-                'foto_bpjs',
-                'file_bukti',
-                'file_sppr',
-                'foto_pemohon',
-                'foto_ktp_p',
-            ];
-            $fileNames = [];
-            foreach ($files as $file) {
-                $fileNames[$file] = $request->hasFile($file) ? $this->simpanFile($request->file($file), $folder) : null;
-            }
+            $fileNames = $attachments->save($request, null, $newFiles, $obsoleteFiles);
 
             $no_registrasi = $this->generateNoRegistrasi();
 
@@ -680,6 +657,21 @@ class PengajuanHoldController extends Controller
                 'nik_p'             => $request->nik_p ?? '',
                 'nama_saudara'      => $request->nama_saudara ?? '',
                 'no_telp_saudara'   => $request->no_telp_saudara ?? '',
+                'kontak_darurat_1' => $request->kontak_darurat_1,
+                'nama_pemilik_kontak_darurat_1' => $request->nama_pemilik_kontak_darurat_1,
+                'keterangan_kontak_darurat_1' => $request->keterangan_kontak_darurat_1,
+                'kontak_darurat_2' => $request->kontak_darurat_2,
+                'nama_pemilik_kontak_darurat_2' => $request->nama_pemilik_kontak_darurat_2,
+                'keterangan_kontak_darurat_2' => $request->keterangan_kontak_darurat_2,
+                'kontak_darurat_3' => $request->kontak_darurat_3,
+                'nama_pemilik_kontak_darurat_3' => $request->nama_pemilik_kontak_darurat_3,
+                'keterangan_kontak_darurat_3' => $request->keterangan_kontak_darurat_3,
+                'kontak_darurat_4' => $request->kontak_darurat_4,
+                'nama_pemilik_kontak_darurat_4' => $request->nama_pemilik_kontak_darurat_4,
+                'keterangan_kontak_darurat_4' => $request->keterangan_kontak_darurat_4,
+                'kontak_darurat_5' => $request->kontak_darurat_5,
+                'nama_pemilik_kontak_darurat_5' => $request->nama_pemilik_kontak_darurat_5,
+                'keterangan_kontak_darurat_5' => $request->keterangan_kontak_darurat_5,
                 'no_bpjs_kes'       => $request->no_bpjs_kes ?? '',
                 'id_lokasi'         => $request->id_lokasi,
                 'id_kavling'        => $request->id_kavling,
@@ -696,6 +688,7 @@ class PengajuanHoldController extends Controller
                 'file_bukti'        => $fileNames['file_bukti'] ?? null,
                 'file_sppr'         => $fileNames['file_sppr'] ?? null,
                 'foto_pemohon'      => $fileNames['foto_pemohon'] ?? null,
+                'berkas_booking' => $fileNames['berkas_booking'],
                 'stt_reg'           => 1,
             ]);
 
@@ -714,6 +707,7 @@ class PengajuanHoldController extends Controller
             ]);
         } catch (\Throwable $e) {
             DB::rollBack();
+            File::delete(array_map(fn ($file) => public_path('assets/booking/' . $file), $newFiles));
             if ($e instanceof \Illuminate\Validation\ValidationException) {
                 throw $e;
             }
@@ -733,42 +727,6 @@ class PengajuanHoldController extends Controller
         }
     }
 
-    private function simpanFile($file, $folder)
-    {
-        if (! $file) {
-            return null;
-        }
-
-        $filename   = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
-        $filename   = preg_replace('/[^a-zA-Z0-9-_]/', '_', $filename);
-        $filename   = $filename . '_' . time() . '.webp';
-        $outputPath = $folder . '/' . $filename;
-
-        $ext    = strtolower($file->getClientOriginalExtension());
-        $source = null;
-
-        switch ($ext) {
-            case 'jpg':
-            case 'jpeg':
-                $source = imagecreatefromjpeg($file->getPathname());
-                break;
-            case 'png':
-                $source = imagecreatefrompng($file->getPathname());
-                break;
-            default:
-                return null;
-        }
-
-        if ($source) {
-            imagewebp($source, $outputPath, 80);
-            imagedestroy($source);
-
-            return $filename;
-        }
-
-        return null;
-    }
-
     private function generateNoRegistrasi()
     {
         $latest = PengajuanHold::orderBy('no_registrasi', 'desc')->first();
@@ -782,7 +740,7 @@ class PengajuanHoldController extends Controller
         return str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
     }
 
-    private function createCustomer($id, $request)
+    private function createCustomer($id, $request, array &$copiedFiles)
     {
         $data = PengajuanHold::findOrFail($id);
 
@@ -800,15 +758,8 @@ class PengajuanHoldController extends Controller
             $newKode = $prefix . '-0001';
         }
 
-        $files = [
-            'file_bukti'   => 'Bukti Transfer Booking',
-            'foto_ktp'     => 'Foto KTP',
-            'foto_kk'      => 'Foto KK',
-            'foto_npwp'    => 'Foto NPWP',
-            'foto_bpjs'    => 'Foto BPJS',
-            'foto_ktp_p'   => 'Foto KTP Pasangan',
-            'foto_pemohon' => 'Foto Pemohon',
-        ];
+        $bookingFiles = app(BookingAttachments::class)->files($data);
+        $files = array_map(fn ($entry) => $entry['nama'], $bookingFiles);
 
         // Folder ini dapat belum ada pada instalasi baru di hosting. Pastikan
         // tersedia sebelum lampiran booking dipindahkan ke data customer.
@@ -821,23 +772,25 @@ class PengajuanHoldController extends Controller
 
         $customerFiles = [];
         foreach ($files as $field => $label) {
-            $oldPath = public_path('assets/booking/' . $data->$field);
+            $oldPath = public_path('assets/booking/' . $bookingFiles[$field]['file']);
 
-            if ($data->$field && File::exists($oldPath)) {
-                $customerPath = public_path('assets/customer/' . $data->$field);
+            if ($bookingFiles[$field]['file'] && File::exists($oldPath)) {
+                $customerPath = public_path('assets/customer/' . $bookingFiles[$field]['file']);
 
+                $copiedFiles[] = $customerPath;
                 if (! File::copy($oldPath, $customerPath)) {
                     throw new \RuntimeException('Gagal menyalin lampiran customer.');
                 }
 
                 if ($field === 'file_bukti') {
-                    $keuanganPath = public_path('assets/keuangan/pemasukan/' . $data->$field);
+                    $keuanganPath = public_path('assets/keuangan/pemasukan/' . $bookingFiles[$field]['file']);
+                    $copiedFiles[] = $keuanganPath;
                     if (! File::copy($oldPath, $keuanganPath)) {
                         throw new \RuntimeException('Gagal menyalin bukti pembayaran.');
                     }
                 }
 
-                $customerFiles[$field] = $data->$field;
+                $customerFiles[$field] = $bookingFiles[$field]['file'];
             } else {
                 $customerFiles[$field] = null;
             }
@@ -864,6 +817,21 @@ class PengajuanHoldController extends Controller
             'nik_p'             => $data->nik_p,
             'nama_saudara'      => $data->nama_saudara,
             'no_telp_saudara'   => $data->no_telp_saudara,
+            'kontak_darurat_1' => $data->kontak_darurat_1,
+            'nama_pemilik_kontak_darurat_1' => $data->nama_pemilik_kontak_darurat_1,
+            'keterangan_kontak_darurat_1' => $data->keterangan_kontak_darurat_1,
+            'kontak_darurat_2' => $data->kontak_darurat_2,
+            'nama_pemilik_kontak_darurat_2' => $data->nama_pemilik_kontak_darurat_2,
+            'keterangan_kontak_darurat_2' => $data->keterangan_kontak_darurat_2,
+            'kontak_darurat_3' => $data->kontak_darurat_3,
+            'nama_pemilik_kontak_darurat_3' => $data->nama_pemilik_kontak_darurat_3,
+            'keterangan_kontak_darurat_3' => $data->keterangan_kontak_darurat_3,
+            'kontak_darurat_4' => $data->kontak_darurat_4,
+            'nama_pemilik_kontak_darurat_4' => $data->nama_pemilik_kontak_darurat_4,
+            'keterangan_kontak_darurat_4' => $data->keterangan_kontak_darurat_4,
+            'kontak_darurat_5' => $data->kontak_darurat_5,
+            'nama_pemilik_kontak_darurat_5' => $data->nama_pemilik_kontak_darurat_5,
+            'keterangan_kontak_darurat_5' => $data->keterangan_kontak_darurat_5,
             'jenis_perumahan'   => $data->jenis_perumahan,
             'jenis_pembelian'   => $data->jenis_pembelian,
             'id_marketing'      => $data->id_marketing,
@@ -967,12 +935,9 @@ class PengajuanHoldController extends Controller
         foreach (['npwp', 'no_bpjs_kes', 'nama_saudara', 'no_telp_saudara', 'pekerjaan', 'status_pernikahan', 'nama_p', 'nik_p'] as $field) {
             $rules[$field] = 'nullable|string|max:255';
         }
-        $attachmentFields = ['foto_ktp', 'foto_npwp', 'foto_kk', 'foto_bpjs', 'foto_ktp_p', 'file_bukti', 'foto_pemohon'];
-        foreach ($attachmentFields as $field) {
-            $rules[$field] = $field === 'file_bukti'
-                ? 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:10240'
-                : 'nullable|image|mimes:jpg,jpeg,png,webp|max:10240';
-        }
+        $attachments = app(BookingAttachments::class);
+        $attachmentFields = array_keys(BerkasBooking::LEGACY);
+        $rules = array_merge($rules, $attachments->rules($data, (int) $request->stt_reg === 2));
         if ((int) $request->id_marketing !== 0) {
             $rules['id_marketing'] .= '|exists:marketing_offline,id';
         }
@@ -998,8 +963,24 @@ class PengajuanHoldController extends Controller
             'termin_x_cash_b.min'         => 'Termin minimal 1 bulan.',
         ];
 
-        $validated = $request->validate($rules, $messages);
+        $rules['kontak_darurat_1'] = 'nullable|string|max:255';
+        $rules['nama_pemilik_kontak_darurat_1'] = 'nullable|string|max:255';
+        $rules['keterangan_kontak_darurat_1'] = 'nullable|string|max:255';
+        $rules['kontak_darurat_2'] = 'nullable|string|max:255';
+        $rules['nama_pemilik_kontak_darurat_2'] = 'nullable|string|max:255';
+        $rules['keterangan_kontak_darurat_2'] = 'nullable|string|max:255';
+        $rules['kontak_darurat_3'] = 'nullable|string|max:255';
+        $rules['nama_pemilik_kontak_darurat_3'] = 'nullable|string|max:255';
+        $rules['keterangan_kontak_darurat_3'] = 'nullable|string|max:255';
+        $rules['kontak_darurat_4'] = 'nullable|string|max:255';
+        $rules['nama_pemilik_kontak_darurat_4'] = 'nullable|string|max:255';
+        $rules['keterangan_kontak_darurat_4'] = 'nullable|string|max:255';
+        $rules['kontak_darurat_5'] = 'nullable|string|max:255';
+        $rules['nama_pemilik_kontak_darurat_5'] = 'nullable|string|max:255';
+        $rules['keterangan_kontak_darurat_5'] = 'nullable|string|max:255';
+        $validated = $request->validate($rules, $messages, $attachments->attributes($data));
 
+        $copiedFiles = [];
         $newFiles = [];
         $obsoleteFiles = [];
         DB::beginTransaction();
@@ -1013,21 +994,9 @@ class PengajuanHoldController extends Controller
                 ! KavlingPeta::whereKey($kavling->id)->available($data->id)->exists()) {
                 throw \Illuminate\Validation\ValidationException::withMessages(['id_kavling' => 'Kavling tidak tersedia atau tidak sesuai lokasi.']);
             }
-            $bookingValues = collect($validated)->except(array_merge($attachmentFields, ['stt_reg']))->all();
+            $bookingValues = collect($validated)->except(array_merge($attachmentFields, ['stt_reg', 'berkas_booking_files']))->all();
             $bookingValues['total_harga'] = collect($kavling->rincian_biaya ?? [])->sum('nilai');
-            foreach ($attachmentFields as $field) {
-                if ($request->hasFile($field)) {
-                    File::ensureDirectoryExists(public_path('assets/booking'));
-                    $file = $request->file($field);
-                    $filename = (string) \Illuminate\Support\Str::uuid() . '.' . $file->extension();
-                    $newFiles[] = $filename;
-                    $file->move(public_path('assets/booking'), $filename);
-                    if ($data->$field) {
-                        $obsoleteFiles[] = public_path('assets/booking/' . $data->$field);
-                    }
-                    $bookingValues[$field] = $filename;
-                }
-            }
+            $bookingValues = array_merge($bookingValues, $attachments->save($request, $data, $newFiles, $obsoleteFiles));
             $data->update($bookingValues);
             $data->load(['kavling', 'lokasi']);
             if ($request->stt_reg == 2) {
@@ -1056,7 +1025,7 @@ class PengajuanHoldController extends Controller
 
                 $data->update($db);
 
-                $customer = $this->createCustomer($data->id, $request);
+                $customer = $this->createCustomer($data->id, $request, $copiedFiles);
                 $tglNow   = Carbon::now('Asia/Jakarta')->toDateString();
 
                 $rincian = $data->rincian_biaya ?? [];
@@ -1117,12 +1086,11 @@ class PengajuanHoldController extends Controller
             DB::commit();
 
             if ((int) $request->stt_reg === 2) {
-                foreach ($attachmentFields as $field) {
-                    if ($data->$field) {
-                        $obsoleteFiles[] = public_path('assets/booking/' . $data->$field);
-                    }
+                foreach ($attachments->files($data) as $entry) {
+                    $obsoleteFiles[] = public_path('assets/booking/' . $entry['file']);
                 }
             }
+
             try {
                 File::delete($obsoleteFiles);
             } catch (\Throwable $cleanupError) {
@@ -1135,6 +1103,7 @@ class PengajuanHoldController extends Controller
             ]);
         } catch (\Throwable $e) {
             DB::rollBack();
+            File::delete($copiedFiles);
             foreach ($newFiles as $filename) {
                 File::delete([
                     public_path('assets/booking/' . $filename),
@@ -1164,15 +1133,7 @@ class PengajuanHoldController extends Controller
         try {
         $data = PengajuanHold::with(['kavling', 'lokasi'])->findOrFail($id);
 
-            $files = [
-                $data->foto_ktp,
-                $data->foto_npwp,
-                $data->foto_kk,
-                $data->foto_bpjs,
-                $data->foto_pemohon,
-                $data->foto_ktp_p,
-                $data->file_bukti,
-            ];
+            $files = array_column(app(BookingAttachments::class)->files($data), 'file');
 
             foreach ($files as $file) {
                 if (! empty($file) && file_exists(public_path('assets/booking/' . $file))) {

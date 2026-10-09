@@ -100,21 +100,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="form-group row">
-                                            <label for="tgl_registrasi" class="col-sm-4 col-form-label">Nama
-                                                Saudara</label>
-                                            <div class="col-sm-8">
-                                                <input type="text" name="nama_saudara" id="nama_saudara" value="{{ $data->nama_saudara }}" class="form-control">
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group row">
-                                            <label for="tgl_registrasi" class="col-sm-4 col-form-label">No. Telp
-                                                Saudara</label>
-                                            <div class="col-sm-8">
-                                                <input type="text" name="no_telp_saudara" id="no_telp_saudara" value="{{ $data->no_telp_saudara }}" class="form-control">
-                                            </div>
-                                        </div>
+                                        @include('shared.emergency-contacts', ['data' => $data ?? null])
 
                                         <div class="form-group row">
                                             <label class="col-sm-4 col-form-label">Nama Marketing</label>
@@ -227,148 +213,8 @@
                                     </div>
 
                                     <div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <div class="col-sm-6">
-                                                <label class="form-label">Foto KTP</label>
-                                                <div class="img-thumbnail d-flex align-items-center justify-content-center"
-                                                    style="max-width: 350px; height: 180px; background-color: #f8f9fa; border: 1px solid #dee2e6; overflow: hidden;">
-                                                    @if ($data->foto_ktp)
-                                                        <button type="button" class="btn p-0 attachment-preview" data-url="{{ asset('assets/booking/' . $data->foto_ktp) }}" data-pdf="{{ strtolower(pathinfo($data->foto_ktp, PATHINFO_EXTENSION)) === 'pdf' ? '1' : '0' }}" aria-label="Perbesar lampiran" style="width:100%;height:100%;">
-                                                            @if (strtolower(pathinfo($data->foto_ktp, PATHINFO_EXTENSION)) === 'pdf')
-                                                                <span class="text-primary">Lihat PDF</span>
-                                                            @else
-                                                                <img src="{{ asset('assets/booking/' . $data->foto_ktp) }}" alt="Lampiran" style="max-width:100%;max-height:100%;">
-                                                            @endif
-                                                        </button>
-                                                    @else
-                                                        <span class="text-muted">Tidak ada file</span>
-                                                    @endif
-                                                </div>
-                                                <input type="file" name="foto_ktp" id="foto_ktp" class="form-control-file mt-2 attachment-input" accept=".jpg,.jpeg,.png,.webp">
-                                                <small class="text-muted">Pilih file untuk mengganti lampiran (maks. 10 MB).</small>
-                                            </div>
-                                            <div class="col-sm-6">
-                                                <label class="form-label">Foto NPWP</label>
-                                                <div class="img-thumbnail d-flex align-items-center justify-content-center"
-                                                    style="max-width: 350px; height: 180px; background-color: #f8f9fa; border: 1px solid #dee2e6; overflow: hidden;">
-                                                    @if ($data->foto_npwp)
-                                                        <button type="button" class="btn p-0 attachment-preview" data-url="{{ asset('assets/booking/' . $data->foto_npwp) }}" data-pdf="{{ strtolower(pathinfo($data->foto_npwp, PATHINFO_EXTENSION)) === 'pdf' ? '1' : '0' }}" aria-label="Perbesar lampiran" style="width:100%;height:100%;">
-                                                            @if (strtolower(pathinfo($data->foto_npwp, PATHINFO_EXTENSION)) === 'pdf')
-                                                                <span class="text-primary">Lihat PDF</span>
-                                                            @else
-                                                                <img src="{{ asset('assets/booking/' . $data->foto_npwp) }}" alt="Lampiran" style="max-width:100%;max-height:100%;">
-                                                            @endif
-                                                        </button>
-                                                    @else
-                                                        <span class="text-muted">Tidak ada file</span>
-                                                    @endif
-                                                </div>
-                                                <input type="file" name="foto_npwp" id="foto_npwp" class="form-control-file mt-2 attachment-input" accept=".jpg,.jpeg,.png,.webp">
-                                                <small class="text-muted">Pilih file untuk mengganti lampiran (maks. 10 MB).</small>
-                                            </div>
-                                        </div>
-                                        <div class="row mb-3">
-                                            <div class="col-sm-6">
-                                                <label class="form-label">Foto KK</label>
-                                                <div class="img-thumbnail d-flex align-items-center justify-content-center"
-                                                    style="max-width: 350px; height: 180px; background-color: #f8f9fa; border: 1px solid #dee2e6; overflow: hidden;">
-                                                    @if ($data->foto_kk)
-                                                        <button type="button" class="btn p-0 attachment-preview" data-url="{{ asset('assets/booking/' . $data->foto_kk) }}" data-pdf="{{ strtolower(pathinfo($data->foto_kk, PATHINFO_EXTENSION)) === 'pdf' ? '1' : '0' }}" aria-label="Perbesar lampiran" style="width:100%;height:100%;">
-                                                            @if (strtolower(pathinfo($data->foto_kk, PATHINFO_EXTENSION)) === 'pdf')
-                                                                <span class="text-primary">Lihat PDF</span>
-                                                            @else
-                                                                <img src="{{ asset('assets/booking/' . $data->foto_kk) }}" alt="Lampiran" style="max-width:100%;max-height:100%;">
-                                                            @endif
-                                                        </button>
-                                                    @else
-                                                        <span class="text-muted">Tidak ada file</span>
-                                                    @endif
-                                                </div>
-                                                <input type="file" name="foto_kk" id="foto_kk" class="form-control-file mt-2 attachment-input" accept=".jpg,.jpeg,.png,.webp">
-                                                <small class="text-muted">Pilih file untuk mengganti lampiran (maks. 10 MB).</small>
-                                            </div>
-                                            <div class="col-sm-6">
-                                                <label class="form-label">Foto BPJS</label>
-                                                <div class="img-thumbnail d-flex align-items-center justify-content-center"
-                                                    style="max-width: 350px; height: 180px; background-color: #f8f9fa; border: 1px solid #dee2e6; overflow: hidden;">
-                                                    @if ($data->foto_bpjs)
-                                                        <button type="button" class="btn p-0 attachment-preview" data-url="{{ asset('assets/booking/' . $data->foto_bpjs) }}" data-pdf="{{ strtolower(pathinfo($data->foto_bpjs, PATHINFO_EXTENSION)) === 'pdf' ? '1' : '0' }}" aria-label="Perbesar lampiran" style="width:100%;height:100%;">
-                                                            @if (strtolower(pathinfo($data->foto_bpjs, PATHINFO_EXTENSION)) === 'pdf')
-                                                                <span class="text-primary">Lihat PDF</span>
-                                                            @else
-                                                                <img src="{{ asset('assets/booking/' . $data->foto_bpjs) }}" alt="Lampiran" style="max-width:100%;max-height:100%;">
-                                                            @endif
-                                                        </button>
-                                                    @else
-                                                        <span class="text-muted">Tidak ada file</span>
-                                                    @endif
-                                                </div>
-                                                <input type="file" name="foto_bpjs" id="foto_bpjs" class="form-control-file mt-2 attachment-input" accept=".jpg,.jpeg,.png,.webp">
-                                                <small class="text-muted">Pilih file untuk mengganti lampiran (maks. 10 MB).</small>
-                                            </div>
-                                        </div>
-                                        <div class="row mb-3">
-                                            <div class="col-sm-6">
-                                                <label class="form-label">Foto KTP Pasangan</label>
-                                                <div class="img-thumbnail d-flex align-items-center justify-content-center"
-                                                    style="max-width: 350px; height: 180px; background-color: #f8f9fa; border: 1px solid #dee2e6; overflow: hidden;">
-                                                    @if ($data->foto_ktp_p)
-                                                        <button type="button" class="btn p-0 attachment-preview" data-url="{{ asset('assets/booking/' . $data->foto_ktp_p) }}" data-pdf="{{ strtolower(pathinfo($data->foto_ktp_p, PATHINFO_EXTENSION)) === 'pdf' ? '1' : '0' }}" aria-label="Perbesar lampiran" style="width:100%;height:100%;">
-                                                            @if (strtolower(pathinfo($data->foto_ktp_p, PATHINFO_EXTENSION)) === 'pdf')
-                                                                <span class="text-primary">Lihat PDF</span>
-                                                            @else
-                                                                <img src="{{ asset('assets/booking/' . $data->foto_ktp_p) }}" alt="Lampiran" style="max-width:100%;max-height:100%;">
-                                                            @endif
-                                                        </button>
-                                                    @else
-                                                        <span class="text-muted">Tidak ada file</span>
-                                                    @endif
-                                                </div>
-                                                <input type="file" name="foto_ktp_p" id="foto_ktp_p" class="form-control-file mt-2 attachment-input" accept=".jpg,.jpeg,.png,.webp">
-                                                <small class="text-muted">Pilih file untuk mengganti lampiran (maks. 10 MB).</small>
-                                            </div>
-                                            <div class="col-sm-6">
-                                                <label class="form-label">Bukti Transfer</label>
-                                                <div class="img-thumbnail d-flex align-items-center justify-content-center"
-                                                    style="max-width: 350px; height: 180px; background-color: #f8f9fa; border: 1px solid #dee2e6; overflow: hidden;">
-                                                    @if ($data->file_bukti)
-                                                        <button type="button" class="btn p-0 attachment-preview" data-url="{{ asset('assets/booking/' . $data->file_bukti) }}" data-pdf="{{ strtolower(pathinfo($data->file_bukti, PATHINFO_EXTENSION)) === 'pdf' ? '1' : '0' }}" aria-label="Perbesar lampiran" style="width:100%;height:100%;">
-                                                            @if (strtolower(pathinfo($data->file_bukti, PATHINFO_EXTENSION)) === 'pdf')
-                                                                <span class="text-primary">Lihat PDF</span>
-                                                            @else
-                                                                <img src="{{ asset('assets/booking/' . $data->file_bukti) }}" alt="Lampiran" style="max-width:100%;max-height:100%;">
-                                                            @endif
-                                                        </button>
-                                                    @else
-                                                        <span class="text-muted">Tidak ada file</span>
-                                                    @endif
-                                                </div>
-                                                <input type="file" name="file_bukti" id="file_bukti" class="form-control-file mt-2 attachment-input" accept=".jpg,.jpeg,.png,.webp,.pdf">
-                                                <small class="text-muted">Pilih file untuk mengganti lampiran (maks. 10 MB).</small>
-                                            </div>
-                                        </div>
-                                        <div class="row mb-3">
-                                            <div class="col-sm-6">
-                                                <label class="form-label">Foto Pemohon</label>
-                                                <div class="img-thumbnail d-flex align-items-center justify-content-center"
-                                                    style="max-width: 350px; height: 180px; background-color: #f8f9fa; border: 1px solid #dee2e6; overflow: hidden;">
-                                                    @if ($data->foto_pemohon)
-                                                        <button type="button" class="btn p-0 attachment-preview" data-url="{{ asset('assets/booking/' . $data->foto_pemohon) }}" data-pdf="{{ strtolower(pathinfo($data->foto_pemohon, PATHINFO_EXTENSION)) === 'pdf' ? '1' : '0' }}" aria-label="Perbesar lampiran" style="width:100%;height:100%;">
-                                                            @if (strtolower(pathinfo($data->foto_pemohon, PATHINFO_EXTENSION)) === 'pdf')
-                                                                <span class="text-primary">Lihat PDF</span>
-                                                            @else
-                                                                <img src="{{ asset('assets/booking/' . $data->foto_pemohon) }}" alt="Lampiran" style="max-width:100%;max-height:100%;">
-                                                            @endif
-                                                        </button>
-                                                    @else
-                                                        <span class="text-muted">Tidak ada file</span>
-                                                    @endif
-                                                </div>
-                                                <input type="file" name="foto_pemohon" id="foto_pemohon" class="form-control-file mt-2 attachment-input" accept=".jpg,.jpeg,.png,.webp">
-                                                <small class="text-muted">Pilih file untuk mengganti lampiran (maks. 10 MB).</small>
-                                            </div>
-                                        </div>
-                                    </div>
+@include('shared.booking-upload-verification', ['data' => $data])
+</div>
                                 </div>
 
                                 <hr>
@@ -566,8 +412,8 @@
                     return;
                 }
                 const isPdf = file.type === 'application/pdf';
-                if (file.size > 10 * 1024 * 1024 || !(['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || (this.id === 'file_bukti' && isPdf))) {
-                    toastr.error('Pilih gambar JPG/PNG/WebP atau bukti PDF, maksimal 10 MB.');
+                if (file.size > 10 * 1024 * 1024 || !(['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || isPdf)) {
+                    toastr.error('Pilih JPG, PNG, WEBP atau PDF, maksimal 10 MB.');
                     this.value = '';
                     thumbnail.html(input.data('original-preview'));
                     return;
@@ -686,7 +532,8 @@
                         });
 
                         $.each(errors, function(key, val) {
-                            let input = $('#' + key);
+                            const name = key.replace(/^berkas_booking_files\.(.+)$/, 'berkas_booking_files[$1]');
+                            let input = $('#formData :input').filter(function () { return this.name === name; });
                             input.addClass('is-invalid');
                             input.parent().find('.invalid-feedback').remove();
                             input.parent().append(

@@ -127,6 +127,9 @@ Route::middleware(['auth'])->group(function () {
             ->parameters(['pengaturan-template' => 'template'])->except('show');
     });
     Route::get('admin/beranda', [BerandaController::class, 'index'])->name('beranda.index');
+    Route::get('admin/laporan', [\App\Http\Controllers\LaporanController::class, 'index'])->name('laporan.index');
+    Route::get('admin/laporan/detail', [\App\Http\Controllers\LaporanController::class, 'detail'])->name('laporan.detail');
+    Route::get('admin/laporan/excel', [\App\Http\Controllers\LaporanController::class, 'excel'])->name('laporan.excel');
 
     Route::prefix('admin')->controller(DashboardController::class)->group(function () {
         Route::get('/dashboard', fn (\Illuminate\Http\Request $request) => redirect()->route('beranda.index', $request->query()))->name('dashboard.index');
@@ -268,6 +271,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('admin/legal')->group(function () {
         Route::resource('bphtb-ssp', BphtbSSPController::class);
         Route::resource('listrik-air', ListrikAirController::class);
+        Route::post('pengajuan-berkas/{id}/pdf', [BerkasPengajuanController::class, 'pdf'])->name('pengajuan-berkas.pdf');
         Route::resource('pengajuan-berkas', BerkasPengajuanController::class);
     });
 
@@ -316,6 +320,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('bank/data/list', [BankTransaksiController::class, 'getBankList'])->name('bank.list');
         Route::resource('retensi', RetensiController::class);
         Route::resource('notaris', NotarisController::class);
+        Route::resource('berkas-booking', \App\Http\Controllers\Master\BerkasBookingController::class)->only(['index', 'store', 'edit', 'update', 'destroy']);
         Route::resource('jenis-berkas', JenisBerkasController::class)->only(['index', 'store', 'edit', 'update', 'destroy']);
     });
 

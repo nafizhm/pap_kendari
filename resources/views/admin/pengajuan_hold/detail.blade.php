@@ -110,23 +110,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="form-group row">
-                                            <label for="tgl_registrasi" class="col-sm-4 col-form-label">Nama
-                                                Saudara</label>
-                                            <div class="col-sm-8">
-                                                <input type="text" value="{{ $data->nama_saudara }}"
-                                                    class="form-control" readonly>
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group row">
-                                            <label for="tgl_registrasi" class="col-sm-4 col-form-label">No. Telp
-                                                Saudara</label>
-                                            <div class="col-sm-8">
-                                                <input type="text" value="{{ $data->no_telp_saudara }}"
-                                                    class="form-control" readonly>
-                                            </div>
-                                        </div>
+                                        @include('shared.emergency-contacts', ['data' => $data ?? null, 'readonly' => true])
 
                                         <div class="form-group row">
                                             <label class="col-sm-4 col-form-label">Nama Marketing</label>
@@ -242,99 +226,8 @@
                                     </div>
 
                                     <div class="col-md-6">
-                                        <div class="row mb-3">
-                                            <div class="col-sm-6">
-                                                <label class="form-label">Foto KTP</label>
-                                                <div class="img-thumbnail d-flex align-items-center justify-content-center"
-                                                    style="max-width: 350px; height: 180px; background-color: #f8f9fa; border: 1px solid #dee2e6; overflow: hidden;">
-                                                    @if ($data->foto_ktp)
-                                                        <img src="{{ asset('assets/booking/' . $data->foto_ktp) }}"
-                                                            style="max-width: 100%; max-height: 100%;">
-                                                    @else
-                                                        <span style="color: #6c757d;">Tidak ada file</span>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                            <div class="col-sm-6">
-                                                <label class="form-label">Foto NPWP</label>
-                                                <div class="img-thumbnail d-flex align-items-center justify-content-center"
-                                                    style="max-width: 350px; height: 180px; background-color: #f8f9fa; border: 1px solid #dee2e6; overflow: hidden;">
-                                                    @if ($data->foto_npwp)
-                                                        <img src="{{ asset('assets/booking/' . $data->foto_npwp) }}"
-                                                            style="max-width: 100%; max-height: 100%;">
-                                                    @else
-                                                        <span style="color: #6c757d;">Tidak ada file</span>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row mb-3">
-                                            <div class="col-sm-6">
-                                                <label class="form-label">Foto KK</label>
-                                                <div class="img-thumbnail d-flex align-items-center justify-content-center"
-                                                    style="max-width: 350px; height: 180px; background-color: #f8f9fa; border: 1px solid #dee2e6; overflow: hidden;">
-                                                    @if ($data->foto_kk)
-                                                        <img src="{{ asset('assets/booking/' . $data->foto_kk) }}"
-                                                            style="max-width: 100%; max-height: 100%;">
-                                                    @else
-                                                        <span style="color: #6c757d;">Tidak ada file</span>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                            <div class="col-sm-6">
-                                                <label class="form-label">Foto BPJS</label>
-                                                <div class="img-thumbnail d-flex align-items-center justify-content-center"
-                                                    style="max-width: 350px; height: 180px; background-color: #f8f9fa; border: 1px solid #dee2e6; overflow: hidden;">
-                                                    @if ($data->foto_bpjs)
-                                                        <img src="{{ asset('assets/booking/' . $data->foto_bpjs) }}"
-                                                            style="max-width: 100%; max-height: 100%;">
-                                                    @else
-                                                        <span style="color: #6c757d;">Tidak ada file</span>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row mb-3">
-                                            <div class="col-sm-6">
-                                                <label class="form-label">Foto KTP Pasangan</label>
-                                                <div class="img-thumbnail d-flex align-items-center justify-content-center"
-                                                    style="max-width: 350px; height: 180px; background-color: #f8f9fa; border: 1px solid #dee2e6; overflow: hidden;">
-                                                    @if ($data->foto_ktp_p)
-                                                        <img src="{{ asset('assets/booking/' . $data->foto_ktp_p) }}"
-                                                            style="max-width: 100%; max-height: 100%;">
-                                                    @else
-                                                        <span style="color: #6c757d;">Tidak ada file</span>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                            <div class="col-sm-6">
-                                                <label class="form-label">Bukti Transfer</label>
-                                                <div class="img-thumbnail d-flex align-items-center justify-content-center"
-                                                    style="max-width: 350px; height: 180px; background-color: #f8f9fa; border: 1px solid #dee2e6; overflow: hidden;">
-                                                    @if ($data->file_bukti)
-                                                        <img src="{{ asset('assets/booking/' . $data->file_bukti) }}"
-                                                            style="max-width: 100%; max-height: 100%;">
-                                                    @else
-                                                        <span style="color: #6c757d;">Tidak ada file</span>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row mb-3">
-                                            <div class="col-sm-6">
-                                                <label class="form-label">Foto Pemohon</label>
-                                                <div class="img-thumbnail d-flex align-items-center justify-content-center"
-                                                    style="max-width: 350px; height: 180px; background-color: #f8f9fa; border: 1px solid #dee2e6; overflow: hidden;">
-                                                    @if ($data->foto_pemohon)
-                                                        <img src="{{ asset('assets/booking/' . $data->foto_pemohon) }}"
-                                                            style="max-width: 100%; max-height: 100%;">
-                                                    @else
-                                                        <span style="color: #6c757d;">Tidak ada file</span>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+@include('shared.booking-attachments', ['data' => $data, 'readonly' => true])
+</div>
                                 </div>
 
                                 <hr>

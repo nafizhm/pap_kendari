@@ -20,6 +20,10 @@
 
                                     <div class="d-flex align-items-center">
 
+                                        <a href="{{ route('akad.index') }}" class="btn btn-secondary btn-sm mr-2">
+                                            <i class="fas fa-arrow-left"></i> Kembali
+                                        </a>
+
                                         <a href="{{ route('akad.detail.pdf', ['id' => $akad]) }}" target="_blank"
                                             class="btn btn-danger btn-sm mr-2">
                                             <i class="fas fa-file-pdf"></i> Cetak PDF

@@ -163,16 +163,7 @@
 
                         <hr>
 
-                        <div class="form-group row">
-                            <label class="control-label col-sm-3">Nama Saudara</label>
-                            <div class="col-sm-4">
-                                <input name="nama_saudara" id="nama_saudara" class="form-control" type="text">
-                            </div>
-                            <label class="control-label col-sm-2">No. Telp Saudara</label>
-                            <div class="col-sm-3">
-                                <input name="no_telp_saudara" id="no_telp_saudara" class="form-control" type="text">
-                            </div>
-                        </div>
+                        @include('shared.emergency-contacts', ['data' => $data ?? null])
 
                         <hr>
 
@@ -417,7 +408,22 @@
                     $('#status_pernikahan').val(data.status_pernikahan).trigger('change');
                     $('#nama_p').val(data.nama_p);
                     $('#nama_saudara').val(data.nama_saudara);
-                    $('#no_telp_saudara').val(data.no_telp_saudara);
+                    $('#kontak_darurat_1').val(data.kontak_darurat_1 ?? data.no_telp_saudara);
+                    $('#nama_pemilik_kontak_darurat_1').val(data.nama_pemilik_kontak_darurat_1 ?? data.nama_saudara);
+                    $('#keterangan_kontak_darurat_1').val(data.keterangan_kontak_darurat_1 ?? '');
+                    $('#kontak_darurat_2').val(data.kontak_darurat_2 ?? '');
+                    $('#nama_pemilik_kontak_darurat_2').val(data.nama_pemilik_kontak_darurat_2 ?? '');
+                    $('#keterangan_kontak_darurat_2').val(data.keterangan_kontak_darurat_2 ?? '');
+                    $('#kontak_darurat_3').val(data.kontak_darurat_3 ?? '');
+                    $('#nama_pemilik_kontak_darurat_3').val(data.nama_pemilik_kontak_darurat_3 ?? '');
+                    $('#keterangan_kontak_darurat_3').val(data.keterangan_kontak_darurat_3 ?? '');
+                    $('#kontak_darurat_4').val(data.kontak_darurat_4 ?? '');
+                    $('#nama_pemilik_kontak_darurat_4').val(data.nama_pemilik_kontak_darurat_4 ?? '');
+                    $('#keterangan_kontak_darurat_4').val(data.keterangan_kontak_darurat_4 ?? '');
+                    $('#kontak_darurat_5').val(data.kontak_darurat_5 ?? '');
+                    $('#nama_pemilik_kontak_darurat_5').val(data.nama_pemilik_kontak_darurat_5 ?? '');
+                    $('#keterangan_kontak_darurat_5').val(data.keterangan_kontak_darurat_5 ?? '');
+
 
                     $('#id_lokasi').val(data.id_lokasi).trigger('change');
                     setTimeout(function() {
