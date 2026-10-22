@@ -10,6 +10,12 @@ class Wawancara extends Model
 
     protected $fillable = [
         'tgl_wawancara',
+        'nama_petugas',
+        'tanggal_masuk_bank',
+        'petugas_bank',
+        'tanda_terima_bank',
+        'tindak_lanjut_bank',
+        'tanggal_tindak_lanjut_bank',
         'id_customer',
         'catatan_wawancara',
         'status',

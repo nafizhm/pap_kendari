@@ -21,13 +21,13 @@
   <link rel="stylesheet" href="{{ asset('templates/plugins/toastr/toastr.min.css') }}">
   <style>
     :root{
-      --green:#0d3329;
-      --green-2:#174f3d;
-      --gold:#c99a45;
-      --gold-soft:#f5ead6;
-      --text:#102e27;
-      --muted:#6c7a73;
-      --line:#e3dfd6;
+      --green:#095b80;
+      --green-2:#0e78a8;
+      --gold:#ffbf3f;
+      --gold-soft:#fff4d9;
+      --text:#163e52;
+      --muted:#607d8b;
+      --line:#d6e7ef;
       --white:rgba(255,255,255,.92);
     }
     *{box-sizing:border-box}
@@ -79,6 +79,17 @@
     .spinner-border{display:inline-block;width:20px;height:20px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spinner-border .75s linear infinite}.d-none{display:none!important}
     @keyframes spinner-border{to{transform:rotate(360deg)}}
     @media(max-width:640px){body{background-position:center}.page{padding:18px}.login-card{padding:30px 22px 24px;border-radius:22px}h1{font-size:26px}.brand-small{font-size:11px}.row{font-size:12px}.footer{text-align:center;flex-direction:column;gap:8px}}
+    body::before{background:linear-gradient(90deg,rgba(8,62,89,.48),rgba(8,62,89,.16))}
+    .login-title,.brand-small,.tagline,label,.footer b{color:var(--text)}
+    .input-wrap input{color:var(--text)}
+    .input-wrap:focus-within{border-color:var(--green-2);box-shadow:0 0 0 4px rgba(14,120,168,.14)}
+    .icon-box{color:var(--green);background:#eaf5fa}
+    .btn{background:linear-gradient(135deg,var(--green-2),var(--green));box-shadow:0 14px 26px rgba(14,120,168,.28)}
+    .footer{border-top-color:var(--line);color:var(--muted)}
+    .logo svg path{stroke:var(--green-2)}
+    .logo svg path:last-child{stroke:var(--gold)}
+    h1{font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;font-size:16px;line-height:1.4;letter-spacing:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+    @media(max-width:640px){h1{font-size:clamp(10px,3.2vw,16px)}}
   </style>
 </head>
 <body>

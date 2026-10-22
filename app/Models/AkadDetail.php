@@ -19,6 +19,7 @@ class AkadDetail extends Model
         'status',
         'keterangan',
         'jenis_akad',
+        'foto_akad',
     ];
 
     public function customer()

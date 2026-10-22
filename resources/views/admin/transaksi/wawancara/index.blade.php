@@ -17,6 +17,7 @@
                                 <div class="d-flex align-content-center justify-content-between">
                                     <h3 class="font-weight-bold text-lg">Data Wawancara</h3>
                                     <div class="d-flex align-items-center" style="gap: 3px">
+                                        <a href="{{ route('wawancara.monitoring-bank') }}" class="btn btn-info btn-sm"><i class="fas fa-folder-open mr-1"></i>Monitoring Berkas Bank</a>
                                         <button class="btn btn-primary btn-sm" data-toggle="modal"
                                             data-target="#modalForm"><i class="fas fa-plus" id="btnTambah"></i>
                                             Tambah Data Wawancara</button>
@@ -32,6 +33,7 @@
                                             <th>Lokasi Rumah</th>
                                             <th>Tgl Wawancara</th>
                                             <th>Bank KPR</th>
+                                            <th>Petugas Pewawancara</th>
                                             <th>Catatan</th>
                                             <th class="text-center" width="15%">Action</th>
                                         </tr>
@@ -148,6 +150,14 @@
                                         <option value="{{ $m->id }}">{{ $m->nama }}</option>
                                     @endforeach
                                 </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row mb-3">
+                            <label for="nama_petugas" class="col-sm-2 col-form-label">Petugas Pewawancara <span class="text-danger">*</span></label>
+                            <div class="col-sm-8">
+                                <input type="text" name="nama_petugas" id="nama_petugas" class="form-control" maxlength="255" placeholder="Nama petugas yang mewawancarai nasabah" required>
+                                <small class="form-text text-muted">Nama petugas yang melakukan wawancara dan verifikasi berkas nasabah.</small>
                             </div>
                         </div>
 
@@ -435,6 +445,12 @@
                         searchable: false
                     },
                     {
+                        data: 'nama_petugas',
+                        name: 'nama_petugas',
+                        defaultContent: '-',
+                        render: $.fn.dataTable.render.text()
+                    },
+                    {
                         data: 'catatan_wawancara',
                         name: 'catatan_wawancara',
                         orderable: false,
@@ -463,6 +479,7 @@
                 if (response.status === 'success') {
                     $('#primary_id').val(response.data.id);
                     $('#tgl_wawancara').val(response.data.tgl_wawancara);
+                    $('#nama_petugas').val(response.data.nama_petugas || '');
                     $('#hari_wawancara').val(response.data.hari_wawancara);
                     $('#id_customer').val(response.data.id_customer).trigger('change').prop('disabled',
                         true);

@@ -214,6 +214,7 @@
             background-color: #374151;
         }
     </style>
+    <link rel="stylesheet" href="{{ asset('css/brand-theme.css') }}">
 </head>
 
 <body class="hold-transition sidebar-mini layout-fixed">
@@ -305,12 +306,27 @@
                             $menus = \App\Models\Menu::where('id_parent', 0)->whereIn('id', $allowedMenuIds)
                                 ->with(['children' => fn ($query) => $query->whereIn('id', $allowedMenuIds)])
                                 ->orderBy('urutan')->get();
+                            $groupNavigation = config('navigation.groups', []);
+                            $routeNavigation = config('navigation.routes', []);
+                            $menus = $menus->sortBy(function ($menu) use ($groupNavigation, $routeNavigation) {
+                                return $groupNavigation[$menu->title][1]
+                                    ?? $routeNavigation[$menu->route_name][1]
+                                    ?? (150 + $menu->urutan);
+                            });
                         @endphp
 
                         @foreach ($menus as $menu)
                             @continue($menu->route_name === 'dashboard.index')
                             @php
-                                $children = $menu->children->filter(fn ($child) => RouteFacade::has($child->route_name));
+                                $menuLabel = $groupNavigation[$menu->title][0]
+                                    ?? $routeNavigation[$menu->route_name][0]
+                                    ?? $menu->title;
+                                $children = $menu->children
+                                    ->filter(fn ($child) => RouteFacade::has($child->route_name))
+                                    ->sortBy(fn ($child) => $routeNavigation[$child->route_name][1] ?? (150 + $child->urutan));
+                                if ($menu->title === 'Siteplan') {
+                                    $children = $children->reject(fn ($child) => $child->route_name === 'balik-nama.index');
+                                }
                                 $hasMenuRoute = RouteFacade::has($menu->route_name);
 
                                 if (! $hasMenuRoute && $children->isEmpty()) {
@@ -330,31 +346,34 @@
                                 }
                             @endphp
 
-                            @if ($children->isEmpty())
+                            @if ($children->isEmpty() || $menu->title === 'Siteplan')
                                 @php
+                                    $singleRoute = $menu->title === 'Siteplan' && $children->isNotEmpty()
+                                        ? $children->first()->route_name
+                                        : $menu->route_name;
                                     $isActiveSingle =
-                                        request()->routeIs($menu->route_name . '*') ||
+                                        $isActiveParent || request()->routeIs($singleRoute . '*') ||
                                         Str::before(request()->route()->getName(), '.') ===
-                                            Str::before($menu->route_name, '.');
+                                            Str::before($singleRoute, '.');
                                 @endphp
                                 <li class="nav-item">
-                                    <a href="{{ route($menu->route_name) }}"
+                                    <a href="{{ route($singleRoute) }}"
                                         class="nav-link {{ $isActiveSingle ? '' : '' }}"
-                                        style="{{ $isActiveSingle ? 'background-color: #6610f2 !important; color: #ffffff !important;' : '' }}">
+                                        style="{{ $isActiveSingle ? 'background-color: var(--brand-primary) !important; color: #ffffff !important;' : '' }}">
                                         <i class="nav-icon fas {{ $menu->icon }}"
                                             style="{{ $isActiveSingle ? 'color: #ffffff !important;' : '' }}"></i>
                                         <p style="{{ $isActiveSingle ? 'color: #ffffff !important;' : '' }}">
-                                            {{ $menu->title }}</p>
+                                            {{ $menuLabel }}</p>
                                     </a>
                                 </li>
                             @else
                                 <li class="nav-item {{ $isActiveParent ? 'menu-open' : '' }}">
                                     <a href="#" class="nav-link {{ $isActiveParent ? 'active' : '' }}"
-                                        style="{{ $isActiveParent ? 'background-color: #6610f2 !important; color: #ffffff !important;' : '' }}">
+                                        style="{{ $isActiveParent ? 'background-color: var(--brand-primary) !important; color: #ffffff !important;' : '' }}">
                                         <i class="nav-icon fas {{ $menu->icon }}"
                                             style="{{ $isActiveParent ? 'color: #ffffff !important;' : '' }}"></i>
                                         <p style="{{ $isActiveParent ? 'color: #ffffff !important;' : '' }}">
-                                            {{ $menu->title }}
+                                            {{ $menuLabel }}
                                             <i class="right fas fa-angle-left"
                                                 style="{{ $isActiveParent ? 'color: #ffffff !important;' : '' }}"></i>
                                         </p>
@@ -371,7 +390,7 @@
                                                 <a href="{{ route($child->route_name) }}"
                                                     class="nav-link {{ $isActiveChild ? 'active' : '' }}">
                                                     <i class="far fa-circle nav-icon"></i>
-                                                    <p>{{ $child->title }}</p>
+                                                    <p>{{ $routeNavigation[$child->route_name][0] ?? $child->title }}</p>
                                                 </a>
                                             </li>
                                         @endforeach
@@ -385,13 +404,6 @@
                         </form>
                     </ul>
                 </nav>
-                <div class="sidebar-fixed-bottom">
-                    <a href="{{ route('panduan-aplikasi.index') }}" target="_blank" class="nav-link">
-                        <i class="nav-icon fas fa-info-circle"></i>
-                        <p>Panduan Aplikasi</p>
-                    </a>
-                </div>
-
                 <!-- /.sidebar-menu -->
             </div>
             <!-- /.sidebar -->

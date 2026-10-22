@@ -357,14 +357,25 @@ class AkadController extends Controller
     {
         $request->validate([
             'jenis_akad' => 'required',
+            'foto_akad' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:10240',
         ], [
             'jenis_akad.required' => 'Jenis akad wajib diisi.',
         ]);
 
+        $newPhoto = null;
         DB::beginTransaction();
         try {
 
             $detail = AkadDetail::findOrFail($id);
+
+            if ($request->hasFile('foto_akad')) {
+                \Illuminate\Support\Facades\File::ensureDirectoryExists(public_path('assets/akad'));
+                $photo = $request->file('foto_akad');
+                $filename = (string) \Illuminate\Support\Str::uuid() . '.' . $photo->extension();
+                $newPhoto = public_path('assets/akad/' . $filename);
+                $photo->move(public_path('assets/akad'), $filename);
+                $detail->foto_akad = $filename;
+            }
 
             $detail->update([
                 'status'     => 2,
@@ -387,6 +398,10 @@ class AkadController extends Controller
             ]);
         } catch (\Throwable $e) {
             DB::rollBack();
+
+            if ($newPhoto) {
+                \Illuminate\Support\Facades\File::delete($newPhoto);
+            }
 
             Log::error('Error update hadir akad: ' . $e->getMessage());
 

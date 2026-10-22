@@ -100,17 +100,7 @@
 
                         <div class="card card-primary card-outline card-outline-tabs">
                             <div class="card-header p-0 border-bottom-0">
-                                <ul class="nav nav-tabs" id="custom-tabs-four-tab" role="tablist">
-                                    @foreach ($lokasiKavling as $index => $kav)
-                                        <li class="nav-item">
-                                            <a class="nav-link {{ $index == 0 ? 'active' : '' }}"
-                                                id="custom-tabs-four-{{ $kav->id }}-tab" data-toggle="pill"
-                                                href="#custom-tabs-four-{{ $kav->id }}" role="tab">
-                                                {{ $kav->nama_kavling }}
-                                            </a>
-                                        </li>
-                                    @endforeach
-                                </ul>
+                                @include('admin.siteplan.navigation')
                             </div>
 
                             <div class="card-body">

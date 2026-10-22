@@ -60,7 +60,11 @@ class WawancaraController extends Controller
                     $btn = '<div class="d-flex justify-content-center">';
 
                     if ($permissions['edit']) {
-                        $btn .= '<button class="btn btn-warning text-white btn-xs acc-bank-button" data-id="' . e($row->id) . '" data-url="' . e($editUrl) . '">Acc Bank</button>';
+                        if ($row->tanggal_masuk_bank && $row->tanda_terima_bank) {
+                            $btn .= '<button class="btn btn-warning text-white btn-xs acc-bank-button" data-id="' . e($row->id) . '" data-url="' . e($editUrl) . '">Acc Bank</button>';
+                        } else {
+                            $btn .= '<a class="btn btn-info btn-xs" href="' . e(route('wawancara.monitoring-bank', ['nasabah' => $row->id])) . '">Masukkan Berkas ke Bank</a>';
+                        }
                         $btn .= '<button class="btn btn-primary btn-xs mx-1 edit-button" data-id="' . e($row->id) . '" data-url="' . e($editUrl) . '">Edit</button>';
                     }
 
@@ -167,6 +171,7 @@ class WawancaraController extends Controller
             'tgl_wawancara'     => 'required',
             'id_customer'       => 'required',
             'catatan_wawancara' => 'nullable',
+            'nama_petugas' => 'required|string|max:255',
             'id_bank_kpr'       => 'required',
         ], [
             'tgl_wawancara.required' => 'Tanggal wawancara wajib diisi.',
@@ -181,6 +186,7 @@ class WawancaraController extends Controller
                 'id_bank_kpr'       => $request->id_bank_kpr,
                 'id_customer'       => $request->id_customer,
                 'catatan_wawancara' => $request->catatan_wawancara ?? '',
+                'nama_petugas' => $request->nama_petugas,
                 'status'            => 1,
             ]);
 
@@ -210,10 +216,14 @@ class WawancaraController extends Controller
     public function update(Request $request, $id)
     {
         $wawancara = Wawancara::findOrFail($id);
+        if ($wawancara->tanggal_masuk_bank && (string) $request->id_bank_kpr !== (string) $wawancara->id_bank_kpr) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['id_bank_kpr' => 'Bank tidak dapat diganti setelah penyerahan berkas dicatat.']);
+        }
 
         $request->validate([
             'tgl_wawancara'     => 'required',
             'catatan_wawancara' => 'nullable',
+            'nama_petugas' => 'required|string|max:255',
             'id_bank_kpr'       => 'required',
         ], [
             'tgl_wawancara.required' => 'Tanggal wawancara wajib diisi.',
@@ -226,6 +236,7 @@ class WawancaraController extends Controller
                 'tgl_wawancara'     => $request->tgl_wawancara,
                 'id_bank_kpr'       => $request->id_bank_kpr,
                 'catatan_wawancara' => $request->catatan_wawancara ?? '',
+                'nama_petugas' => $request->nama_petugas,
             ]);
 
             $this->logEdit('Wawancara', $wawancara->id);
@@ -247,6 +258,10 @@ class WawancaraController extends Controller
 
     public function simpanSp3k(Request $request, $id)
     {
+        $submission = Wawancara::findOrFail($id);
+        if (! $submission->tanggal_masuk_bank || ! $submission->tanda_terima_bank) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['tanda_terima_bank' => 'Masukkan berkas ke bank dan unggah tanda terima sebelum ACC bank.']);
+        }
         $request->validate([
             'acc_plafon'      => 'required',
             'tenor'           => 'required',
@@ -320,6 +335,77 @@ class WawancaraController extends Controller
                 'message' => 'Terjadi kesalahan saat menyimpan data: ' . $e->getMessage(),
             ], 500);
         }
+    }
+
+    private function authorizeBankMonitoring(bool $write = false): void
+    {
+        $menuIds = \App\Models\Menu::where('route_name', 'wawancara.index')->pluck('id');
+        abort_unless(\App\Models\HakAkses::where('id_user', auth()->id())->whereIn('id_menu', $menuIds)
+            ->where('lihat', 1)->when($write, fn ($query) => $query->where('edit', 1))->exists(), 403);
+    }
+
+    public function monitoringBank(Request $request)
+    {
+        $this->authorizeBankMonitoring();
+        $records = Wawancara::with(['customer.lokasi', 'customer.kavling', 'bankKPR', 'wawancaraSp3k'])
+            ->whereNotNull('tanggal_masuk_bank')->orderBy('tanggal_masuk_bank')->get();
+        $pending = Wawancara::with(['customer', 'bankKPR'])->where('status', 1)->whereNull('tanggal_masuk_bank')
+            ->whereHas('customer', fn ($query) => $query->where('stt_arsip', 0))->get();
+        return view('admin.transaksi.wawancara.monitoring-bank', compact('records', 'pending'));
+    }
+
+    public function masukBank(Request $request, $id)
+    {
+        $this->authorizeBankMonitoring(true);
+        $values = $request->validate([
+            'tanggal_masuk_bank' => 'required|date|before_or_equal:today',
+            'petugas_bank' => 'required|string|max:255',
+            'tanda_terima_bank' => 'required|file|mimes:pdf,jpg,jpeg,png|max:10240',
+            'konfirmasi_tanda_tangan' => 'accepted',
+        ]);
+        $path = null;
+        try {
+            DB::transaction(function () use ($id, $request, $values, &$path) {
+                $record = Wawancara::lockForUpdate()->findOrFail($id);
+                abort_if($record->tanggal_masuk_bank || (int) $record->status !== 1, 422, 'Berkas sudah masuk bank atau wawancara tidak lagi aktif.');
+                $path = $request->file('tanda_terima_bank')->store('bank-receipts', 'local');
+                $record->update([
+                    'tanggal_masuk_bank' => $values['tanggal_masuk_bank'],
+                    'petugas_bank' => $values['petugas_bank'],
+                    'tanda_terima_bank' => $path,
+                ]);
+                $this->logEdit('Penyerahan Berkas Bank', $record->id);
+            });
+        } catch (\Throwable $exception) {
+            if ($path) \Illuminate\Support\Facades\Storage::disk('local')->delete($path);
+            throw $exception;
+        }
+        return back()->with('success', 'Berkas berhasil dicatat masuk bank. Batas pemantauan ACC adalah 20 hari kalender.');
+    }
+
+    public function tandaTerimaBank($id)
+    {
+        $this->authorizeBankMonitoring();
+        $record = Wawancara::findOrFail($id);
+        abort_unless($record->tanda_terima_bank && \Illuminate\Support\Facades\Storage::disk('local')->exists($record->tanda_terima_bank), 404);
+        return response()->file(\Illuminate\Support\Facades\Storage::disk('local')->path($record->tanda_terima_bank), ['X-Content-Type-Options' => 'nosniff']);
+    }
+
+    public function tindakLanjutBank(Request $request, $id)
+    {
+        $this->authorizeBankMonitoring(true);
+        $values = $request->validate(['tindak_lanjut_bank' => 'required|string|max:5000']);
+        DB::transaction(function () use ($id, $values) {
+            $record = Wawancara::lockForUpdate()->findOrFail($id);
+            abort_unless($record->tanggal_masuk_bank, 422, 'Berkas belum masuk bank.');
+            $entry = now('Asia/Jakarta')->format('d/m/Y H:i') . ' - ' . auth()->user()->username . ': ' . $values['tindak_lanjut_bank'];
+            $record->update([
+                'tindak_lanjut_bank' => trim(($record->tindak_lanjut_bank ?? '') . "\n" . $entry),
+                'tanggal_tindak_lanjut_bank' => now('Asia/Jakarta'),
+            ]);
+            $this->logEdit('Tindak Lanjut Berkas Bank', $record->id);
+        });
+        return back()->with('success', 'Hasil tindak lanjut bank berhasil dicatat.');
     }
 
     public function destroy($id)

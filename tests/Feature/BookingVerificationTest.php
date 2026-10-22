@@ -111,6 +111,23 @@ class BookingVerificationTest extends TestCase
         $this->assertFileExists(public_path('assets/booking/existing.png'));
     }
 
+    public function test_approval_requires_booking_agreement(): void
+    {
+        $this->postJson('/_test/booking/1', $this->payload(['stt_reg' => 2]))
+            ->assertUnprocessable()->assertJsonValidationErrors('perjanjian_booking');
+        $this->assertDatabaseHas('pengajuan_hold', ['id' => 1, 'stt_reg' => 1]);
+    }
+
+    public function test_booking_agreement_can_be_uploaded_before_approval(): void
+    {
+        $this->post('/_test/booking/1', $this->payload([
+            'perjanjian_booking' => UploadedFile::fake()->createWithContent('agreement.pdf', "%PDF-1.4\n1 0 obj\n<<>>\nendobj\n%%EOF"),
+        ]), ['Accept' => 'application/json'])->assertOk();
+        $booking = PengajuanHold::findOrFail(1);
+        $this->assertSame('Perjanjian Booking', $booking->berkas_booking['perjanjian_booking']['nama']);
+        $this->assertFileExists(public_path('assets/booking/' . $booking->berkas_booking['perjanjian_booking']['file']));
+    }
+
     public function test_all_five_emergency_contacts_are_saved_and_displayed(): void
     {
         $contacts = [];

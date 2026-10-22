@@ -102,7 +102,7 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form id="formHadir">
+                <form id="formHadir" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-body">
                         <input type="hidden" id="id_detail_akad" name="id_detail_akad">
@@ -128,6 +128,13 @@
                             </select>
                         </div>
                     </div>
+                        <div class="form-group row mb-3">
+                            <label for="foto_akad" class="col-sm-3 col-form-label">Foto Akad (Opsional)</label>
+                            <div class="col-sm-9">
+                                <input type="file" name="foto_akad" id="foto_akad" class="form-control-file" accept="image/jpeg,image/png,image/webp">
+                                <small class="form-text text-muted">Format JPG, JPEG, PNG, atau WEBP. Maksimal 10 MB. Boleh dikosongkan.</small>
+                            </div>
+                        </div>
                         <div class="form-group row mb-3">
                             <label class="col-sm-3 col-form-label">Keterangan (Opsional)</label>
                             <div class="col-sm-9">

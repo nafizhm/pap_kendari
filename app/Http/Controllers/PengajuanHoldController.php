@@ -938,6 +938,9 @@ class PengajuanHoldController extends Controller
         $attachments = app(BookingAttachments::class);
         $attachmentFields = array_keys(BerkasBooking::LEGACY);
         $rules = array_merge($rules, $attachments->rules($data, (int) $request->stt_reg === 2));
+        $hasAgreement = ! empty($data->berkas_booking['perjanjian_booking']['file']);
+        $rules['perjanjian_booking'] = ((int) $request->stt_reg === 2 && ! $hasAgreement ? 'required' : 'nullable')
+            . '|file|mimes:pdf,jpg,jpeg,png|max:10240';
         if ((int) $request->id_marketing !== 0) {
             $rules['id_marketing'] .= '|exists:marketing_offline,id';
         }
@@ -949,6 +952,9 @@ class PengajuanHoldController extends Controller
         }
 
         $messages = [
+            'perjanjian_booking.required' => 'Dokumen Perjanjian Booking wajib diunggah sebelum booking disetujui.',
+            'perjanjian_booking.mimes' => 'Perjanjian Booking harus berupa PDF, JPG, JPEG, atau PNG.',
+            'perjanjian_booking.max' => 'Ukuran Perjanjian Booking maksimal 10 MB.',
             'stt_reg.required'            => 'Status Verifikasi wajib dipilih!',
             'stt_reg.in'                  => 'Status verifikasi harus Pending, Disetujui atau Ditolak.',
             'jenis_pembelian.required_if' => 'Jenis Pembelian wajib dipilih saat booking disetujui!',
@@ -994,9 +1000,20 @@ class PengajuanHoldController extends Controller
                 ! KavlingPeta::whereKey($kavling->id)->available($data->id)->exists()) {
                 throw \Illuminate\Validation\ValidationException::withMessages(['id_kavling' => 'Kavling tidak tersedia atau tidak sesuai lokasi.']);
             }
-            $bookingValues = collect($validated)->except(array_merge($attachmentFields, ['stt_reg', 'berkas_booking_files']))->all();
+            $bookingValues = collect($validated)->except(array_merge($attachmentFields, ['stt_reg', 'berkas_booking_files', 'perjanjian_booking']))->all();
             $bookingValues['total_harga'] = collect($kavling->rincian_biaya ?? [])->sum('nilai');
             $bookingValues = array_merge($bookingValues, $attachments->save($request, $data, $newFiles, $obsoleteFiles));
+            if ($request->hasFile('perjanjian_booking')) {
+                File::ensureDirectoryExists(public_path('assets/booking'));
+                $agreement = $request->file('perjanjian_booking');
+                $filename = (string) \Illuminate\Support\Str::uuid() . '.' . $agreement->extension();
+                $newFiles[] = $filename;
+                $agreement->move(public_path('assets/booking'), $filename);
+                if ($oldAgreement = $data->berkas_booking['perjanjian_booking']['file'] ?? null) {
+                    $obsoleteFiles[] = public_path('assets/booking/' . $oldAgreement);
+                }
+                $bookingValues['berkas_booking']['perjanjian_booking'] = ['nama' => 'Perjanjian Booking', 'file' => $filename];
+            }
             $data->update($bookingValues);
             $data->load(['kavling', 'lokasi']);
             if ($request->stt_reg == 2) {

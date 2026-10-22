@@ -1,8 +1,29 @@
 @extends('admin.layout_admin')
+@push('css')
+    <style>
+        .booking-verification .content-header { padding: 24px 20px; }
+        .booking-verification .card { border: 1px solid #dce8ef; border-radius: 12px; box-shadow: 0 4px 18px rgba(8,62,89,.06); }
+        .booking-verification .card-header { border-radius: 12px 12px 0 0; }
+        .booking-verification .card-body { padding: 24px; }
+        .booking-verification .verification-heading { font-size: 16px; font-weight: 700; color: var(--brand-primary); border-bottom: 1px solid #dce8ef; padding-bottom: 12px; margin-bottom: 22px; }
+        .booking-verification .form-group { margin-bottom: 18px; }
+        .booking-verification .col-form-label { font-size: 14px; font-weight: 600; }
+        .booking-verification .form-control { border-radius: 6px; }
+        .booking-verification .agreement-upload { background: #f3f9fc; border: 1px dashed #9dc8dd; border-radius: 10px; padding: 20px; }
+        .dark-mode .booking-verification .agreement-upload { background: #1f2937; border-color: #45647a; }
+        .dark-mode .booking-verification .card { border-color: #374151; }
+        @media (min-width: 768px) { .booking-verification #formData > .row > .col-md-6 { padding-left: 20px; padding-right: 20px; } }
+        @media (max-width: 767px) { .booking-verification .card-body { padding: 16px; } .booking-verification .verification-heading { margin-top: 16px; } }
+    </style>
+@endpush
 @section('content')
-    <div class="content-wrapper">
+    <div class="content-wrapper booking-verification">
         <section class="content-header">
             <div class="container-fluid">
+                <div class="d-flex flex-wrap justify-content-between align-items-center" style="gap: 12px;">
+                    <div><h1 class="h4 font-weight-bold mb-1">Verifikasi Booking</h1><p class="text-muted mb-0">Periksa data pelanggan, kelengkapan dokumen, dan pembayaran sebelum memberikan persetujuan.</p></div>
+                    <a href="{{ route('pengajuan-hold.index') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left mr-2"></i>Kembali</a>
+                </div>
             </div>
         </section>
 
@@ -20,6 +41,7 @@
                                 <form id="formData" enctype="multipart/form-data">
                                 <div class="row">
                                     <div class="col-md-6">
+                                        <h4 class="verification-heading"><i class="fas fa-user mr-2"></i>Data Pelanggan & Booking</h4>
                                         <div class="form-group row">
                                             <label for="tgl_registrasi" class="col-sm-4 col-form-label">Tanggal</label>
                                             <div class="col-sm-8">
@@ -213,6 +235,7 @@
                                     </div>
 
                                     <div class="col-md-6">
+                                        <h4 class="verification-heading"><i class="fas fa-folder-open mr-2"></i>Lampiran Pendukung</h4>
 @include('shared.booking-upload-verification', ['data' => $data])
 </div>
                                 </div>
@@ -223,6 +246,18 @@
                                     @csrf
                                     <input type="hidden" id="primary_id" name="primary_id"
                                         value="{{ $data->id }}">
+
+                                    <h4 class="verification-heading"><i class="fas fa-file-signature mr-2"></i>Perjanjian Booking</h4>
+                                    <div class="agreement-upload mb-4">
+                                        <label for="perjanjian_booking">Unggah Dokumen Perjanjian Booking</label>
+                                        <p class="text-muted small">Wajib dilengkapi sebelum status diubah menjadi Disetujui. Format PDF, JPG, JPEG, atau PNG; maksimal 10 MB.</p>
+                                        @if ($agreementFile = $data->berkas_booking['perjanjian_booking']['file'] ?? null)
+                                            <a href="{{ asset('assets/booking/' . $agreementFile) }}" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm mb-3"><i class="fas fa-file-alt mr-1"></i>Lihat Perjanjian Booking</a>
+                                        @endif
+                                        <input type="file" name="perjanjian_booking" id="perjanjian_booking" class="form-control-file" accept="application/pdf,image/jpeg,image/png" aria-describedby="agreement-help">
+                                        <small id="agreement-help" class="text-muted d-block mt-2">{{ $agreementFile ? 'Unggah file baru hanya jika ingin mengganti dokumen.' : 'Dokumen belum diunggah.' }}</small>
+                                    </div>
+                                    <h4 class="verification-heading"><i class="fas fa-check-circle mr-2"></i>Keputusan Verifikasi</h4>
 
                                     <div class="form-group row">
                                         <label for="stt_reg" class="col-sm-2 col-form-label">Status Verifikasi</label>
@@ -344,6 +379,11 @@
 @push('scripts')
     <script>
         $(function() {
+            function updateAgreementRequirement() {
+                $('#perjanjian_booking').prop('required', $('#stt_reg').val() === '2' && ! @json((bool) ($data->berkas_booking['perjanjian_booking']['file'] ?? false)));
+            }
+            $('#stt_reg').on('change', updateAgreementRequirement);
+            updateAgreementRequirement();
             const kavlings = @json($kavlingList);
             const originalKavling = @json((string) $data->id_kavling);
             function fillKavlings(selected) {

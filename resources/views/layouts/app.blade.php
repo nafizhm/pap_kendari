@@ -26,6 +26,7 @@
     <link rel="stylesheet" href="{{ asset('templates/plugins/toastr/toastr.min.css') }}">
 
     @stack('styles')
+    <link rel="stylesheet" href="{{ asset('css/brand-theme.css') }}">
 </head>
 
 <body class="hold-transition sidebar-mini" style="background-color: #ebebeb;">

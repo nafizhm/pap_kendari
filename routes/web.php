@@ -201,6 +201,10 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::prefix('admin/transaksi')->group(function () {
+        Route::get('monitoring-berkas-bank', [WawancaraController::class, 'monitoringBank'])->name('wawancara.monitoring-bank');
+        Route::post('wawancara/{id}/masuk-bank', [WawancaraController::class, 'masukBank'])->name('wawancara.masuk-bank');
+        Route::post('wawancara/{id}/tindak-lanjut-bank', [WawancaraController::class, 'tindakLanjutBank'])->name('wawancara.tindak-lanjut-bank');
+        Route::get('wawancara/{id}/tanda-terima-bank', [WawancaraController::class, 'tandaTerimaBank'])->name('wawancara.tanda-terima-bank');
         Route::resource('wawancara', WawancaraController::class);
         Route::get('/wawancara/detail-customer/{id_customer}', [WawancaraController::class, 'detailCustomer'])->name('wawancara.detail-customer');
         Route::post('/wawancara/acc-bank/{id_wawancara}', [WawancaraController::class, 'simpanSp3k'])->name('wawancara.sp3k');
